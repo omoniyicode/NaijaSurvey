@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
         <a class="navbar-brand" href="index.php">
-            <img src="assets/images/logo.jpeg" alt="Logo">
+            <img src="assets/images/logo.png" alt="Logo">
             <div class="brand-text">
                 <span class="brand-name">Survey Connect</span>
                 <span class="brand-tagline">mapping trust connecting</span>

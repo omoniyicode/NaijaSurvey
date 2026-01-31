@@ -17,7 +17,7 @@
 <?php include "components/header.php"; ?>
 
 <!-- About Hero -->
-<section class="section">
+<section class="container section">
   <div class="row align-items-center g-5 mt-3">
 
     <!-- Left Image -->
@@ -159,8 +159,8 @@
     SurveyConnect gives you confidence and credibility.
   </p>
   <div class="hero-buttons justify-content-center">
-    <button class="btn btn-gold">Meet Verified Surveyors</button>
+    <a href="surveyor-listing.php"><button class="btn btn-gold">Meet Verified Surveyors</button></a>
   </div>
 </section>
 
-<?php include "includes/footer.php"; ?>
+<?php include "components/footer.php"; ?>

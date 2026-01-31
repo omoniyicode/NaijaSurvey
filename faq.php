@@ -7,6 +7,8 @@
 
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
 <style>
 body{
@@ -58,6 +60,19 @@ body{
 .site-footer hr{
     border-color:rgba(255,255,255,0.2);
 }
+.back-arrow {
+  position: fixed;       /* stays at the top */
+  top: 15px;
+  left: 15px;
+  font-size: 20px;       /* small arrow */
+  text-decoration: none;
+  color: #faf8f8ff;
+  cursor: pointer;
+  z-index: 1000;
+}
+.back-arrow:hover {
+  color: #c9b351ff;
+}
 </style>
 </head>
 
@@ -65,6 +80,9 @@ body{
 
 <!-- HEADER -->
 <section class="faq-header text-center">
+    <a href="contact.php" class="back-arrow">
+     <i class="fa fa-arrow-left"></i>
+    </a>
     <div class="container">
         <h1 class="fw-bold">Frequently Asked Questions</h1>
         <p class="mt-2">Find answers to common questions about SurveyConnect</p>

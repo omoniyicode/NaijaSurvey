@@ -5270,3 +5270,113 @@ body{background:var(--bg);}
     height: 80px !important;
   }
 }
+
+/*----ABOUT US----*/
+.section {
+    padding: 80px 0;
+}
+
+.section-title {
+    text-align: center;
+    font-weight: 700;
+    color: #0b6b3a;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.section-title::after {
+    content: "";
+    width: 60px;
+    height: 4px;
+    background: #d4a017;
+    display: block;
+    margin: 12px auto 0;
+    border-radius: 2px;
+}
+
+.lead {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #444;
+}
+
+/* ---------- IMAGE ---------- */
+.section img {
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+/* ---------- WHY SURVEYCONNECT ---------- */
+.masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.masonry .card {
+    border-radius: 15px;
+    padding: 30px;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.bg-success {
+    background-color: #198754 !important;
+}
+
+.bg-success h4 {
+    margin-bottom: 15px;
+}
+
+.bg-success p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* ---------- WHAT WE OFFER ---------- */
+.card-custom {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 35px 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card-custom h4 {
+    color: #0b6b3a;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.card-custom p {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+.card-custom:hover {
+    transform: translateY(-6px);
+}
+
+/* ---------- LIGHT GREEN SECTIONS ---------- */
+.section[style*="#eef5ef"] {
+    background-color: #eef5ef !important;
+}
+
+/* ---------- CTA BUTTON ---------- */
+.btn-gold {
+    background-color: #d4a017;
+    color: #000;
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 30px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+    background-color: #b58a12;
+    color: #fff;
+}

@@ -42,4 +42,52 @@ class Job {
         $stmt->bindParam(':job_address', $job_address);
         return $stmt->execute();
     }
+
+    //Search for jobs
+    public function searchJobs($pdo, $filters = [])
+{
+    $sql = "
+        SELECT 
+            j.id AS job_id,
+            j.job_title,
+            j.job_description,
+            j.job_state,
+            j.job_lga,
+            j.job_address,
+            j.proposed_budget,
+            j.created_at,
+            c.first_name,
+            c.surname,
+            c.id AS client_profile_id
+        FROM jobs j
+        JOIN clients_profile c ON j.client_profile_id = c.id
+        WHERE 1
+    ";
+
+    $params = [];
+
+    if (!empty($filters['q'])) {
+        $sql .= " AND (j.job_title LIKE ? OR j.job_description LIKE ?)";
+        $params[] = '%' . $filters['q'] . '%';
+        $params[] = '%' . $filters['q'] . '%';
+    }
+
+    if (!empty($filters['location'])) {
+        $sql .= " AND j.job_state = ?";
+        $params[] = $filters['location'];
+    }
+
+    if (!empty($filters['type'])) {
+        $sql .= " AND j.job_type = ?";
+        $params[] = $filters['type'];
+    }
+
+    $sql .= " ORDER BY j.created_at DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }

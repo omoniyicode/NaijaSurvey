@@ -330,4 +330,26 @@ class Request{
             return false;
         }
     }
+
+    //Get surveyor recent activity
+    public function getRecentActivity($surveyor_profile_id, $pdo, $limit = 5) {
+        $limit = (int) $limit; // IMPORTANT
+
+        $sql = "
+            SELECT 
+                client_profile_id,
+                request_status,
+                created_at
+            FROM request_to_surveyors
+            WHERE surveyor_profile_id = ?
+            ORDER BY created_at DESC
+            LIMIT $limit
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$surveyor_profile_id]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

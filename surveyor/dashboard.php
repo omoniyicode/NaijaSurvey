@@ -15,6 +15,14 @@ $account_id = $_SESSION['id'];
 // get surveyor profile
 $surveyorProfile = new SurveyorProfile();
 $profile = $surveyorProfile->getSurveyorProfileByAccountId($account_id, $pdo);
+$surveyorName = $profile['first_name']; // e.g. Godsown
+
+//surveyor profile display
+$profileImage = !empty($profile['profile_image'])
+    ? "../uploads/profile_images/" . $profile['profile_image']
+    : "../assets/images/client_avatar.jpg";
+
+
 
 //If surveyor profile does not exist, redirect to profile setup page
 if(!$profile){
@@ -26,7 +34,7 @@ $surveyor_profile_id = $profile['id'];
 
 // get request stats
 $request = new Request();
-
+$recentActivities = $request->getRecentActivity($surveyor_profile_id, $pdo);
 $totalIncomingRequests = $request->getSurveyorTotalIncomingRequests($surveyor_profile_id, $pdo);
 $totalOutgoingRequests = $request->getSurveyorTotalOutgoingRequests($surveyor_profile_id, $pdo);
 $totalCompletedRequests = $request->getSurveyorTotalCompletedRequests($surveyor_profile_id, $pdo);
@@ -64,7 +72,12 @@ $totalPendingRequests = $request->getSurveyorTotalPendingRequests($surveyor_prof
       </div>
       <div class="topbar-actions">
         <i class="bi bi-bell-fill"></i>
-        <i class="bi bi-person-circle"></i>
+        <img 
+        src="<?php echo $profileImage; ?>" 
+        alt="Profile"
+        class="rounded-circle"
+        style="width: 36px; height: 36px; object-fit: cover;"
+        >
       </div>
     </nav>
 
@@ -73,7 +86,9 @@ $totalPendingRequests = $request->getSurveyorTotalPendingRequests($surveyor_prof
 
       <!-- Welcome Section -->
       <div class="mb-4">
-        <h2 class="mb-2" style="color: var(--primary-green); font-weight: 700;">Welcome Back, Surveyor!</h2>
+        <h2 class="mb-2" style="color: var(--primary-green); font-weight: 700;">
+          Welcome Back, <?php echo ($surveyorName); ?>!
+        </h2>
         <p class="text-muted">Here's an overview of your activities and requests.</p>
       </div>
 
@@ -149,6 +164,7 @@ $totalPendingRequests = $request->getSurveyorTotalPendingRequests($surveyor_prof
           </div>
         </div>
 
+         <!-- Recent Activity -->
         <div class="col-lg-6">
           <div class="request-card">
             <div class="request-card-header">
@@ -157,29 +173,35 @@ $totalPendingRequests = $request->getSurveyorTotalPendingRequests($surveyor_prof
             <div class="list-group list-group-flush">
               <div class="list-group-item">
                 <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1">New request from Mary Okafor</h6>
-                    <small class="text-muted">2 hours ago</small>
-                  </div>
-                  <span class="status-badge pending">Pending</span>
-                </div>
-              </div>
-              <div class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1">Job completed for Ade Johnson</h6>
-                    <small class="text-muted">1 day ago</small>
-                  </div>
-                  <span class="status-badge completed">Completed</span>
-                </div>
-              </div>
-              <div class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1">Request accepted by client</h6>
-                    <small class="text-muted">2 days ago</small>
-                  </div>
-                  <span class="status-badge accepted">Accepted</span>
+                  <div class="list-group list-group-flush">
+                      <?php if (empty($recentActivities)): ?>
+                        <div class="list-group-item text-muted">
+                          No recent activity yet.
+                        </div>
+                      <?php else: ?>
+                        <?php foreach ($recentActivities as $activity): ?>
+                          <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <div>
+                                <h6 class="mb-1">
+                                  <?php echo ucfirst($activity['status']); ?> request
+                                  <?php if (!empty($activity['client_name'])): ?>
+                                    from <?php echo htmlspecialchars($activity['client_name']); ?>
+                                  <?php endif; ?>
+                                </h6>
+                                <small class="text-muted">
+                                  <?php echo date("M j, Y g:i A", strtotime($activity['created_at'])); ?>
+                                </small>
+                              </div>
+
+                              <span class="status-badge <?php echo strtolower($activity['status']); ?>">
+                                <?php echo ucfirst($activity['status']); ?>
+                              </span>
+                            </div>
+                          </div>
+                        <?php endforeach; ?>
+                      <?php endif; ?>
+                    </div>
                 </div>
               </div>
             </div>

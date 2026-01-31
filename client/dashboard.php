@@ -15,6 +15,13 @@ $account_id = $_SESSION['id'];
 // get client profile
 $clientProfile = new ClientProfile();
 $profile = $clientProfile->getClientProfileByAccountId($account_id, $pdo);
+$clientName = $profile['first_name'];
+
+//surveyor profile display
+$profileImage = !empty($profile['profile_image'])
+    ? "../uploads/profile_images/" . $profile['profile_image']
+    : "../assets/images/client_avatar.jpg";
+
 
 //If client profile does not exist, redirect to profile setup page
 if(!$profile){
@@ -64,7 +71,12 @@ $totalPendingRequests = $request->getClientTotalPendingRequests($client_profile_
       </div>
       <div class="topbar-actions">
         <i class="bi bi-bell-fill"></i>
-        <i class="bi bi-person-circle"></i>
+        <img 
+        src="<?php echo $profileImage; ?>" 
+        alt="Profile"
+        class="rounded-circle"
+        style="width: 36px; height: 36px; object-fit: cover;"
+        >
       </div>
     </nav>
 
@@ -73,7 +85,9 @@ $totalPendingRequests = $request->getClientTotalPendingRequests($client_profile_
 
       <!-- Welcome Section -->
       <div class="mb-4">
-        <h2 class="mb-2" style="color: var(--primary-green); font-weight: 700;">Welcome Back, Client!</h2>
+        <h2 class="mb-2" style="color: var(--primary-green); font-weight: 700;">
+          Welcome Back, <?php echo ($clientName); ?>!
+        </h2>
         <p class="text-muted">Here's an overview of your activities and requests.</p>
       </div>
 

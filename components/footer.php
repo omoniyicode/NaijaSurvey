@@ -4,7 +4,7 @@
         <div class="row g-4">
             <div class="col-lg-4 col-md-6">
                 <div class="footer-brand">
-                    <img src="assets/images/logo.jpeg" alt="Logo" class="footer-logo">
+                    <img src="assets/images/logo.png" alt="Logo" class="footer-logo">
                     <h5>Survey Connect</h5>
                     <p class="footer-tagline">Mapping Trust, Connecting Professionals</p>
                 </div>

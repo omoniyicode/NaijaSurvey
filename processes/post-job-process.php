@@ -1,4 +1,12 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'client') {
+    $_SESSION['error'] = "Unauthorized action.";
+    header("Location: ../jobs.php");
+    exit();
+}
+
 if(isset($_POST['post_job'])){
 
     session_start();

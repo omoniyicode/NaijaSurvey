@@ -4,7 +4,14 @@ require_once "config/db-connect.php";
 require_once "models/Job.php";
 
 $jobsInstance = new Job();
-$jobs = $jobsInstance->getAllJobs($pdo);
+$filters = [
+    'q'        => $_GET['q'] ?? null,
+    'location' => $_GET['location'] ?? null,
+    'type'     => $_GET['type'] ?? null,
+];
+
+$jobs = $jobsInstance->searchJobs($pdo, $filters);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,42 +70,45 @@ $jobs = $jobsInstance->getAllJobs($pdo);
 
   <!-- Search & Filter Section -->
   <section class="search-filter-section">
-    <div class="container">
-      <div class="search-filter-card">
-        <div class="row g-3 align-items-end">
-          <div class="col-lg-4 col-md-6">
-            <label class="form-label fw-semibold">Search Jobs</label>
-            <input type="text" class="form-control" placeholder="Enter job title or keyword...">
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <label class="form-label fw-semibold">Location</label>
-            <select class="form-select">
-              <option value="">All Locations</option>
-              <option>Lagos</option>
-              <option>Abuja (FCT)</option>
-              <option>Benue</option>
-              <option>Kaduna</option>
-              <option>Rivers</option>
-            </select>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <label class="form-label fw-semibold">Survey Type</label>
-            <select class="form-select">
-              <option value="">All Types</option>
-              <option>Boundary Survey</option>
-              <option>Topographic Survey</option>
-              <option>GIS Survey</option>
-              <option>Site Layout</option>
-            </select>
-          </div>
-          <div class="col-lg-2 col-md-6">
-            <button class="btn btn-gold w-100">
-              <i class="bi bi-search me-2"></i>Search
-            </button>
+    <form method="GET" action="">
+
+        <div class="container">
+          <div class="search-filter-card">
+            <div class="row g-3 align-items-end">
+              <div class="col-lg-4 col-md-6">
+                <label class="form-label fw-semibold">Search Jobs</label>
+                <input type="text"  name="q" class="form-control" placeholder="Enter job title or keyword...">
+              </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Location</label>
+                <select  name="location" class="form-select">
+                  <option value="">All Locations</option>
+                  <option>Lagos</option>
+                  <option>Abuja (FCT)</option>
+                  <option>Benue</option>
+                  <option>Kaduna</option>
+                  <option>Rivers</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-semibold">Survey Type</label>
+                <select name="type" class="form-select">
+                  <option value="">All Types</option>
+                  <option>Boundary Survey</option>
+                  <option>Topographic Survey</option>
+                  <option>GIS Survey</option>
+                  <option>Site Layout</option>
+                </select>
+              </div>
+              <div class="col-lg-2 col-md-6">
+                <button type="submit" class="btn btn-gold w-100">
+                  <i class="bi bi-search me-2"></i>Search
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+    </form>
   </section>
 
   <!-- Jobs List Section -->
