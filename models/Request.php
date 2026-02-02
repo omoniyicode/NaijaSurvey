@@ -103,16 +103,28 @@ class Request{
     }
 
     //Get list of surveyor outgoing requests
-    public function getSurveyorOutgoingRequests($surveyor_profile_id, $pdo){
-        $sql = "SELECT r.*, c.first_name, c.surname 
-                FROM request_to_clients r
-                LEFT JOIN clients_profile c ON r.client_profile_id = c.id
-                WHERE r.surveyor_profile_id = ? 
-                ORDER BY r.created_at DESC";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$surveyor_profile_id]);
-        $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $requests;
+   public function getSurveyorOutgoingRequests($surveyor_profile_id, $pdo){
+    $sql = "
+        SELECT 
+            r.id,
+            r.request_status,
+            r.created_at,
+            c.first_name,
+            c.surname,
+            j.job_title,
+            j.job_state
+        FROM request_to_clients r
+        LEFT JOIN clients_profile c 
+            ON r.client_profile_id = c.id
+        LEFT JOIN jobs j 
+            ON r.job_id = j.id
+        WHERE r.surveyor_profile_id = ?
+        ORDER BY r.created_at DESC
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$surveyor_profile_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     //Get details of a specific surveyor incoming request by ID and surveyor profile id (also get all the profile details of the client who made the request)
@@ -143,17 +155,29 @@ class Request{
     }
 
     //Get list of client incoming requests
-    public function getClientIncomingRequests($client_profile_id, $pdo){
-        $sql = "SELECT r.*, s.first_name, s.surname 
-                FROM request_to_clients r
-                LEFT JOIN surveyors_profile s ON r.surveyor_profile_id = s.id
-                WHERE r.client_profile_id = ? 
-                ORDER BY r.created_at DESC";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$client_profile_id]);
-        $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $requests;
+    public function getClientIncomingRequests($client_profile_id, $pdo) {
+    $sql = "
+        SELECT 
+            rtc.id,
+            rtc.request_status,
+            j.job_title AS job_title,
+            sp.first_name,
+            sp.surname
+        FROM request_to_clients rtc
+        JOIN jobs j 
+            ON rtc.job_id = j.id
+        JOIN surveyors_profile sp 
+            ON rtc.surveyor_profile_id = sp.id
+        WHERE rtc.client_profile_id = ?
+        ORDER BY rtc.created_at DESC
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$client_profile_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    
 
     //Get list of client outgoing requests
     public function getClientOutgoingRequests($client_profile_id, $pdo){

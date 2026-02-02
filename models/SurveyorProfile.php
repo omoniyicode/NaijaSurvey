@@ -59,9 +59,9 @@ class SurveyorProfile{
     }
 
     //Create Surveyor Profile
-    public function createSurveyorProfile($account_id, $first_name, $surname, $other_names, $phone_number, $whatsapp_number, $years_of_experience, $bio, $state, $lga, $address, $profile_image, $id_type, $id_document, $surcon_number, $pdo){
+    public function createSurveyorProfile($account_id, $first_name, $surname, $other_names, $phone_number, $whatsapp_number, $years_of_experience, $bio, $state, $lga, $address, $profile_image, $id_type, $id_document, $surcon_number, $specialization, $pdo){
         
-        $sql = "INSERT INTO surveyors_profile (account_id, first_name, surname, other_names, phone_number, whatsapp_number, years_of_experience, bio, state, lga, address, profile_image, id_type, id_document, surcon_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO surveyors_profile (account_id, first_name, surname, other_names, phone_number, whatsapp_number, years_of_experience, bio, state, lga, address, profile_image, id_type, id_document, surcon_number specialization) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([
@@ -79,16 +79,17 @@ class SurveyorProfile{
             $profile_image,
             $id_type,
             $id_document,
-            $surcon_number
+            $surcon_number,
+            $specialization
         ]);
         
         return $result ? $pdo->lastInsertId() : false;
     }
 
     //Edit Surveyor Profile by Account ID
-    public function editSurveyorProfileByAccountId($account_id, $first_name, $surname, $other_names, $phone_number, $whatsapp_number, $years_of_experience, $bio, $state, $lga, $address, $profile_image, $id_type, $id_document, $surcon_number, $pdo){
+    public function editSurveyorProfileByAccountId($account_id, $first_name, $surname, $other_names, $phone_number, $whatsapp_number, $years_of_experience, $bio, $state, $lga, $address, $profile_image, $id_type, $id_document, $surcon_number, $specialization, $pdo){
         
-        $sql = "UPDATE surveyors_profile SET first_name = ?, surname = ?, other_names = ?, phone_number = ?, whatsapp_number = ?, years_of_experience = ?, bio = ?, state = ?, lga = ?, address = ?, profile_image = ?, id_type = ?, id_document = ?, surcon_number = ? WHERE account_id = ?";
+        $sql = "UPDATE surveyors_profile SET first_name = ?, surname = ?, other_names = ?, phone_number = ?, whatsapp_number = ?, years_of_experience = ?, bio = ?, state = ?, lga = ?, address = ?, profile_image = ?, id_type = ?, id_document = ?, surcon_number = ?, specialization = ? WHERE account_id = ?";
         
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([
@@ -106,9 +107,27 @@ class SurveyorProfile{
             $id_type,
             $id_document,
             $surcon_number,
+            $specialization,
             $account_id
         ]);
         
         return $stmt->rowCount() > 0;
+    }
+
+    public function getVerifiedSurveyorById($surveyor_id, $pdo) {
+        $sql = "
+            SELECT 
+                s.*,
+                a.email
+            FROM surveyors_profile s
+            LEFT JOIN accounts a ON s.account_id = a.id
+            WHERE s.id = ?
+              AND s.verification_status = 'verified'
+            LIMIT 1
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$surveyor_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

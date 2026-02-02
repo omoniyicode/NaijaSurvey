@@ -3,16 +3,33 @@ session_start();
 require_once "config/db-connect.php";
 require_once "models/Job.php";
 
-$jobsInstance = new Job();
+// pagination settings (MUST come first)
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 6; // jobs per page
+$offset = ($page - 1) * $limit;
+
+// filters
 $filters = [
     'q'        => $_GET['q'] ?? null,
     'location' => $_GET['location'] ?? null,
     'type'     => $_GET['type'] ?? null,
 ];
 
-$jobs = $jobsInstance->searchJobs($pdo, $filters);
+$jobsInstance = new Job();
 
+// total count
+$totalJobs = $jobsInstance->countJobs($pdo, $filters);
+$totalPages = ceil($totalJobs / $limit);
+
+// paginated jobs
+$jobs = $jobsInstance->searchJobsPaginated(
+    $pdo,
+    $filters,
+    $limit,
+    $offset
+);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -117,7 +134,7 @@ $jobs = $jobsInstance->searchJobs($pdo, $filters);
       
       <!-- Results Header -->
       <div class="results-header">
-        <h5>Showing <span class="text-primary"><?php echo count($jobs); ?> Jobs Available</span></h5>
+        <h5>Showing <span class="text-primary"><?php echo $totalJobs; ?> Jobs Available</span></h5>
         <div class="view-toggle">
           <button class="btn btn-sm btn-outline-secondary active">
             <i class="bi bi-grid"></i>
@@ -173,7 +190,7 @@ $jobs = $jobsInstance->searchJobs($pdo, $filters);
                   <button class="btn btn-outline-primary w-100"
                       data-bs-toggle="modal"
                       data-bs-target="#jobDetailModal"
-                      data-job-id="<?php echo $job['job_id']; ?>"
+                      data-job-id="<?php echo $job['id']; ?>"
                       data-client-profile-id="<?php echo $job['client_profile_id']; ?>"
                       data-title="<?php echo htmlspecialchars($job['job_title']); ?>"
                       data-client="<?php echo $client_name; ?>"
@@ -192,20 +209,39 @@ $jobs = $jobsInstance->searchJobs($pdo, $filters);
       </div>
 
       <!-- Pagination -->
+      <?php if ($totalPages > 1): ?>
       <div class="pagination-wrapper">
         <nav>
           <ul class="pagination justify-content-center">
-            <li class="page-item disabled">
-              <a class="page-link"><i class="bi bi-chevron-left"></i></a>
+
+            <!-- Previous -->
+            <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+              <a class="page-link" href="?page=<?php echo $page - 1; ?>">
+                <i class="bi bi-chevron-left"></i>
+              </a>
             </li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>
+
+            <!-- Page numbers -->
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+              <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                <a class="page-link" href="?page=<?php echo $i; ?>">
+                  <?php echo $i; ?>
+                </a>
+              </li>
+            <?php endfor; ?>
+
+            <!-- Next -->
+            <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+              <a class="page-link" href="?page=<?php echo $page + 1; ?>">
+                <i class="bi bi-chevron-right"></i>
+              </a>
             </li>
+
           </ul>
         </nav>
       </div>
+      <?php endif; ?>
+
 
     </div>
   </section>

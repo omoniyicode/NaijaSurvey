@@ -21,6 +21,7 @@ if(isset($_POST['save_profile'])){
     $address = trim($_POST['address']);
     $id_type = trim($_POST['id_type']);
     $surcon_number = trim($_POST['surcon_number']);
+    $specialization = trim($_POST['specialization'] ?? '');
     $surveyor_profile_url = "Location: ../surveyor/profile.php";
 
 
@@ -35,7 +36,7 @@ if(isset($_POST['save_profile'])){
     //Validate required fields
     if(empty($first_name) || empty($surname) || empty($phone_number) || empty($whatsapp_number) || 
        empty($years_of_experience) || empty($bio) || empty($state) || empty($lga) || 
-       empty($address) || empty($id_type) || empty($surcon_number)){
+       empty($address) || empty($id_type) || empty($surcon_number) || empty($specialization)){
         $_SESSION['error'] = "Please fill in all required fields.";
         header($surveyor_profile_url);
         exit();
@@ -122,7 +123,7 @@ if(isset($_POST['save_profile'])){
         $result = $surveyorProfileInstance->editSurveyorProfileByAccountId(
             $account_id, $first_name, $surname, $other_names, $phone_number, $whatsapp_number,
             $years_of_experience, $bio, $state, $lga, $address, $profile_image, $id_type,
-            $id_document, $surcon_number, $pdo
+            $id_document, $surcon_number, $specialization, $pdo
         );
 
         if($result){
@@ -139,7 +140,7 @@ if(isset($_POST['save_profile'])){
         $result = $surveyorProfileInstance->createSurveyorProfile(
             $account_id, $first_name, $surname, $other_names, $phone_number, $whatsapp_number,
             $years_of_experience, $bio, $state, $lga, $address, $profile_image, $id_type,
-            $id_document, $surcon_number, $pdo
+            $id_document, $surcon_number, $specialization, $pdo
         );
 
         if($result){

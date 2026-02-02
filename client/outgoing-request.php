@@ -1,3 +1,51 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'client') {
+    header("Location: ../login.php");
+    exit();
+}
+
+if (!isset($_GET['id'])) {
+    header("Location: outgoing-requests.php");
+    exit();
+}
+
+require_once "../config/db-connect.php";
+require_once "../models/ClientProfile.php";
+require_once "../models/Request.php";
+
+// account id
+$account_id = $_SESSION['id'];
+$request_id = (int) $_GET['id'];
+
+// get client profile
+$clientProfileModel = new ClientProfile();
+$profile = $clientProfileModel->getClientProfileByAccountId($account_id, $pdo);
+
+if (!$profile) {
+    header("Location: profile.php");
+    exit();
+}
+
+$client_profile_id = $profile['id'];
+
+// get outgoing request details
+$requestModel = new Request();
+$request = $requestModel->getClientOutgoingRequestById(
+    $request_id,
+    $client_profile_id,
+    $pdo
+);
+
+if (!$request) {
+    header("Location: outgoing-requests.php");
+    exit();
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -57,39 +105,39 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Name</strong>
-                  <span>PrimeGeo Surveys Ltd</span>
+                  <span><?= htmlspecialchars($request['first_name'] . ' ' . $request['surname']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>SURCON No</strong>
-                  <span>SURCON/45892</span>
+                  <span><?= htmlspecialchars($request['surcon_number']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Phone</strong>
-                  <span>0803 456 7788</span>
+                  <span><?= htmlspecialchars($request['phone_number']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Email</strong>
-                  <span>primegeosurvey@gmail.com</span>
+                  <span><?= htmlspecialchars($request['email']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>WhatsApp</strong>
-                  <span>0814 724 3526</span>
+                  <span><?= htmlspecialchars($request['whatsapp_number']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>State</strong>
-                  <span>Benue</span>
+                  <span><?= htmlspecialchars($request['state']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>LGA</strong>
-                  <span>Otukpo</span>
+                  <span><?= htmlspecialchars($request['lga']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Address</strong>
-                  <span>Entina plaza</span>
+                  <span><?= htmlspecialchars($request['address']) ?></span>
                 </div>
                 <div class="detail-item" style="grid-column: 1 / -1;">
                   <strong>Bio</strong>
-                  <span>I am a professional Surveyor</span>
+                  <<span><?= htmlspecialchars($request['bio']) ?></span>
                 </div>
               </div>
             </div>
@@ -104,31 +152,35 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Service Category</strong>
-                  <span>Boundary Survey</span>
+                  <span><?= htmlspecialchars($request['service_category']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Project State</strong>
-                  <span>Benue</span>
+                  <span><?= htmlspecialchars($request['project_state']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Project LGA</strong>
-                  <span>Makurdi</span>
+                  <span><?= htmlspecialchars($request['project_lga']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Project Address</strong>
-                  <span>Benue, Nigeria</span>
+                  <span><?= htmlspecialchars($request['project_address']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Estimated Budget</strong>
-                  <span class="text-success fw-bold">₦150,000 – ₦250,000</span>
+                  <span class="text-success fw-bold">
+                    ₦<?= number_format($request['estimated_budget']) ?>
+                  </span>
                 </div>
                 <div class="detail-item">
                   <strong>Request Status</strong>
-                  <span class="status-badge pending">Pending</span>
+                  <span class="status-badge <?= strtolower($request['request_status']) ?>">
+                    <?= ucfirst($request['request_status']) ?>
+                  </span>
                 </div>
                 <div class="detail-item">
                   <strong>Created At</strong>
-                  <span>14 Jan 2026</span>
+                  <span><?= date('d M Y', strtotime($request['created_at'])) ?></span>
                 </div>
               </div>
             </div>
@@ -140,7 +192,9 @@
               <h3 class="detail-section-title">
                 <i class="bi bi-file-text-fill"></i> Project Description
               </h3>
-              <p class="text-muted">Client requires a professional boundary survey for land documentation and official record purposes.</p>
+              <p class="text-muted">
+                <?= nl2br(htmlspecialchars($request['project_description'])) ?>
+              </p>
             </div>
 
             <hr>

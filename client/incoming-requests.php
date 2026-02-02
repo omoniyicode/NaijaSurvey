@@ -1,3 +1,39 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'client') {
+    header("Location: ../login.php");
+    exit();
+}
+
+require_once "../config/db-connect.php";
+require_once "../models/ClientProfile.php";
+require_once "../models/Request.php";
+
+// get account id
+$account_id = $_SESSION['id'];
+
+// get client profile
+$clientProfileModel = new ClientProfile();
+$profile = $clientProfileModel->getClientProfileByAccountId($account_id, $pdo);
+
+// if client profile does not exist
+if (!$profile) {
+    header("Location: profile.php");
+    exit();
+}
+
+$client_profile_id = $profile['id'];
+
+// get list of incoming requests from surveyors
+$requestModel = new Request();
+$incomingRequestsToClient = $requestModel->getClientIncomingRequests($client_profile_id, $pdo);
+
+
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -54,37 +90,39 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>John Survey Ltd</td>
-              <td>Boundary Survey</td>
-              <td><span class="status-badge pending">Pending</span></td>
-              <td>
-                <a href="incoming-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Precision Surveys</td>
-              <td>Topographic Survey</td>
-              <td><span class="status-badge accepted">Accepted</span></td>
-              <td>
-                <a href="incoming-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>GeoMap Solutions</td>
-              <td>Construction Survey</td>
-              <td><span class="status-badge rejected">Rejected</span></td>
-              <td>
-                <a href="incoming-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-          </tbody>
+            <?php if (empty($incomingRequestsToClient)): ?>
+              <tr>
+                <td colspan="4" class="text-center text-muted">
+                  No incoming requests yet.
+                </td>
+              </tr>
+            <?php else: ?>
+              <?php foreach ($incomingRequestsToClient as $reqest): ?>
+                <tr>
+                  <td>
+                    <?php echo htmlspecialchars($reqest['first_name'] . ' ' . $reqest['surname']); ?>
+                  </td>
+
+                  <td>
+                    <?php echo htmlspecialchars($reqest['job_title']); ?>
+                  </td>
+
+                  <td>
+                    <span class="status-badge <?php echo $reqest['request_status']; ?>">
+                      <?php echo ucfirst($reqest['request_status']); ?>
+                    </span>
+                  </td>
+
+                  <td>
+                    <a href="incoming-request.php?id=<?php echo $reqest['id']; ?>" 
+                      class="btn btn-sm btn-primary">
+                      <i class="bi bi-eye me-1"></i> View
+                    </a>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+            </tbody>
         </table>
       </div>
 

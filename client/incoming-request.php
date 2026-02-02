@@ -1,3 +1,70 @@
+<?php
+session_start();
+
+/* 1. Protect page */
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'client') {
+    header("Location: ../login.php");
+    exit();
+}
+
+/* 2. Load dependencies */
+require_once "../config/db-connect.php";
+require_once "../models/ClientProfile.php";
+require_once "../models/Request.php";
+
+/* 3. Resolve client profile */
+$account_id = $_SESSION['id'];
+$clientProfileModel = new ClientProfile();
+$profile = $clientProfileModel->getClientProfileByAccountId($account_id, $pdo);
+
+if (!$profile) {
+    header("Location: profile.php");
+    exit();
+}
+
+$client_profile_id = $profile['id'];
+
+/* 4. HANDLE FORM SUBMISSION (THIS PART 👇) */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];              // accepted or rejected
+    $request_id = (int) $_POST['request_id'];
+
+    $requestModel = new Request();
+    $requestModel->updateRequestToClientStatus(
+        $request_id,
+        $client_profile_id,
+        $action,
+        $pdo
+    );
+
+    header("Location: incoming-requests.php");
+    exit();
+}
+
+/* 5. Fetch request details (GET) */
+if (!isset($_GET['id'])) {
+    header("Location: incoming-requests.php");
+    exit();
+}
+
+$request_id = (int) $_GET['id'];
+
+$requestModel = new Request();
+$request = $requestModel->getClientIncomingRequestById(
+    $request_id,
+    $client_profile_id,
+    $pdo
+);
+
+if (!$request) {
+    header("Location: incoming-requests.php");
+    exit();
+}
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -56,39 +123,39 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Name</strong>
-                  <span>John Survey Ltd</span>
+                  <span><?= htmlspecialchars($request['first_name'] . ' ' . $request['surname']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Years of Experience</strong>
-                  <span>8 Years</span>
+                  <span><?= (int) $request['years_of_experience'] ?> Years</span>
                 </div>
                 <div class="detail-item">
                   <strong>SURCON No</strong>
-                  <span>SURCON/45221</span>
+                  <span><?= htmlspecialchars($request['surcon_number']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Phone</strong>
-                  <span>0803 123 4567</span>
+                  <span><?= htmlspecialchars($request['phone_number']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>WhatsApp</strong>
-                  <span>0803 123 4567</span>
+                 <span><?= htmlspecialchars($request['whatsapp_number']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>State</strong>
-                  <span>Kogi</span>
+                  <span><?= htmlspecialchars($request['state']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>LGA</strong>
-                  <span>Olamaboro</span>
+                 <span><?= htmlspecialchars($request['lga']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Address</strong>
-                  <span>Street View 1</span>
+                  <span><?= htmlspecialchars($request['address']) ?></span>
                 </div>
                 <div class="detail-item" style="grid-column: 1 / -1;">
                   <strong>Bio</strong>
-                  <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime vero voluptatum quam fugit amet maiores ab qui eius culpa, a odio magnam, fugiat odit suscipit eligendi repellendus commodi animi necessitatibus.</span>
+                  <span><?= htmlspecialchars($request['bio']) ?></span>
                 </div>
               </div>
             </div>
@@ -103,23 +170,25 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Job Title</strong>
-                  <span>Boundary Survey</span>
+                  <span><?= htmlspecialchars($request['job_title']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>State</strong>
-                  <span>Benue</span>
+                  <span><?= htmlspecialchars($request['job_state']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>LGA</strong>
-                  <span>Makurdi</span>
+                  <span><?= htmlspecialchars($request['job_lga']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Job Address</strong>
-                  <span>8. Gorge Akume street</span>
+                 <span><?= htmlspecialchars($request['job_address']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Proposed Budget</strong>
-                  <span class="text-success fw-bold">₦150,000 – ₦250,000</span>
+                 <span class="text-success fw-bold">
+                    ₦<?= number_format($request['proposed_budget']) ?>
+                 </span>
                 </div>
               </div>
             </div>
@@ -131,7 +200,9 @@
               <h3 class="detail-section-title">
                 <i class="bi bi-file-text-fill"></i> Job Description
               </h3>
-              <p class="text-muted">Client needs a professional boundary survey for land documentation.</p>
+              <p class="text-muted">
+                <?= nl2br(htmlspecialchars($request['job_description'])) ?>
+              </p>
             </div>
 
             <hr>
@@ -139,12 +210,18 @@
             <!-- Action Buttons -->
             <div class="d-flex justify-content-between align-items-center">
               <div class="d-flex gap-2">
-                <button class="btn btn-success">
-                  <i class="bi bi-check-circle me-1"></i> Accept
-                </button>
-                <button class="btn btn-danger">
-                  <i class="bi bi-x-circle me-1"></i> Reject
-                </button>
+                <form method="post" class="d-flex gap-2">
+                  <input type="hidden" name="request_id" value="<?= $request['rtc_table_id'] ?>">
+
+                  <button type="submit" name="action" value="accepted" class="btn btn-success">
+                    <i class="bi bi-check-circle me-1"></i> Accept
+                  </button>
+
+                  <button type="submit" name="action" value="rejected" class="btn btn-danger">
+                    <i class="bi bi-x-circle me-1"></i> Reject
+                  </button>
+                </form>
+
               </div>
 
               <!-- View Deliverables Button -->

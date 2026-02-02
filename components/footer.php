@@ -1,3 +1,17 @@
+<?php
+
+$dashboardLink = "login.php"; // default
+
+if (isset($_SESSION['id'], $_SESSION['user_type'])) {
+    if ($_SESSION['user_type'] === 'client') {
+        $dashboardLink = "client/dashboard.php";
+    } elseif ($_SESSION['user_type'] === 'surveyor') {
+        $dashboardLink = "surveyor/dashboard.php";
+    }
+}
+
+?>
+
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
@@ -5,7 +19,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="footer-brand">
                     <img src="assets/images/logo.png" alt="Logo" class="footer-logo">
-                    <h5>Survey Connect</h5>
+                    <h5>Naija survey</h5>
                     <p class="footer-tagline">Mapping Trust, Connecting Professionals</p>
                 </div>
                 <p class="footer-desc">Your trusted platform for connecting with verified, licensed surveyors across Nigeria.</p>
@@ -25,7 +39,7 @@
                 <h6 class="footer-title">For Professionals</h6>
                 <ul class="footer-links">
                     <li><a href="register.php">Register as Surveyor</a></li>
-                    <li><a href="client_pages/client_dashboard.php">Dashboard</a></li>
+                    <li><a href="<?php echo $dashboardLink; ?>">Dashboard</a></li>
                     <li><a href="post-job-public.php">Post a Job</a></li>
                 </ul>
             </div>
@@ -38,14 +52,14 @@
                     <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
                     <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
                 </div>
-                <p class="mt-3 small">Email: info@surveyconnect.ng<br>Phone: +234 800 000 0000</p>
+                <p class="mt-3 small">Email: info@naijasurvey.ng<br>Phone: +234 800 000 0000</p>
             </div>
         </div>
         
         <hr class="footer-divider">
         
         <div class="footer-bottom">
-            <p>&copy; <?php echo date("Y"); ?> Survey Connect. All Rights Reserved.</p>
+            <p>&copy; <?php echo date("Y"); ?> Naija Survey. All Rights Reserved.</p>
             <div class="footer-bottom-links">
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Service</a>

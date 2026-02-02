@@ -88,6 +88,75 @@ class Job {
     $stmt->execute($params);
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    }
+
+    //pagination 
+   public function searchJobsPaginated($pdo, $filters, $limit, $offset) {
+    // force integers (security)
+    $limit  = (int)$limit;
+    $offset = (int)$offset;
+
+    $sql = "SELECT j.*, c.first_name, c.surname
+            FROM jobs j
+            JOIN clients_profile c ON j.client_profile_id = c.id
+            WHERE 1=1";
+
+    $params = [];
+
+    if (!empty($filters['q'])) {
+        $sql .= " AND j.job_title LIKE ?";
+        $params[] = '%' . $filters['q'] . '%';
+    }
+
+    if (!empty($filters['location'])) {
+        $sql .= " AND j.job_state = ?";
+        $params[] = $filters['location'];
+    }
+
+    if (!empty($filters['type'])) {
+        $sql .= " AND j.job_type = ?";
+        $params[] = $filters['type'];
+    }
+
+    // IMPORTANT CHANGE HERE
+    $sql .= " ORDER BY j.created_at DESC LIMIT $limit OFFSET $offset";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    }
+
+
+    //count job for pagination number
+    public function countJobs($pdo, $filters) {
+    $sql = "SELECT COUNT(*) FROM jobs WHERE 1=1";
+    $params = [];
+
+    if (!empty($filters['q'])) {
+        $sql .= " AND job_title LIKE ?";
+        $params[] = '%' . $filters['q'] . '%';
+    }
+
+    if (!empty($filters['location'])) {
+        $sql .= " AND job_state = ?";
+        $params[] = $filters['location'];
+    }
+
+    if (!empty($filters['type'])) {
+        $sql .= " AND job_type = ?";
+        $params[] = $filters['type'];
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return (int)$stmt->fetchColumn();
 }
+
+
+
 
 }

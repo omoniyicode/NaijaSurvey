@@ -4,7 +4,7 @@
         <a class="navbar-brand" href="index.php">
             <img src="assets/images/logo.png" alt="Logo">
             <div class="brand-text">
-                <span class="brand-name">Survey Connect</span>
+                <span class="brand-name">Naija survey</span>
                 <span class="brand-tagline">mapping trust connecting</span>
             </div>
         </a>

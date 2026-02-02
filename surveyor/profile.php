@@ -195,6 +195,44 @@ $profile = $surveyorProfile->getSurveyorProfileByAccountId($account_id, $pdo);
                         placeholder="Professional Bio"><?php echo htmlspecialchars($profile['bio'] ?? ''); ?></textarea>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Specialization</label>
+                    <select name="specialization" class="form-select">
+                        <option value="">Select Specialization</option>
+
+                        <option value="Land & Boundary Survey"
+                            <?php echo ($profile['specialization'] ?? '') === 'Land & Boundary Survey' ? 'selected' : ''; ?>>
+                            Land & Boundary Survey
+                        </option>
+
+                        <option value="Engineering Survey"
+                            <?php echo ($profile['specialization'] ?? '') === 'Engineering Survey' ? 'selected' : ''; ?>>
+                            Engineering Survey
+                        </option>
+
+                        <option value="Topographic Survey"
+                            <?php echo ($profile['specialization'] ?? '') === 'Topographic Survey' ? 'selected' : ''; ?>>
+                            Topographic Survey
+                        </option>
+
+                        <option value="Cadastral Survey"
+                            <?php echo ($profile['specialization'] ?? '') === 'Cadastral Survey' ? 'selected' : ''; ?>>
+                            Cadastral Survey
+                        </option>
+
+                        <option value="Hydrographic Survey"
+                            <?php echo ($profile['specialization'] ?? '') === 'Hydrographic Survey' ? 'selected' : ''; ?>>
+                            Hydrographic Survey
+                        </option>
+
+                        <option value="GIS Survey"
+                            <?php echo ($profile['specialization'] ?? '') === 'GIS Survey' ? 'selected' : ''; ?>>
+                            GIS Survey
+                        </option>
+                    </select>
+                </div>
+
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <input type="number" name="years_of_experience"

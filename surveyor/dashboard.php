@@ -184,7 +184,7 @@ $totalPendingRequests = $request->getSurveyorTotalPendingRequests($surveyor_prof
                             <div class="d-flex justify-content-between align-items-center">
                               <div>
                                 <h6 class="mb-1">
-                                  <?php echo ucfirst($activity['status']); ?> request
+                                  <?php echo ucfirst($activity['request_status']); ?> request
                                   <?php if (!empty($activity['client_name'])): ?>
                                     from <?php echo htmlspecialchars($activity['client_name']); ?>
                                   <?php endif; ?>
@@ -194,8 +194,8 @@ $totalPendingRequests = $request->getSurveyorTotalPendingRequests($surveyor_prof
                                 </small>
                               </div>
 
-                              <span class="status-badge <?php echo strtolower($activity['status']); ?>">
-                                <?php echo ucfirst($activity['status']); ?>
+                              <span class="status-badge <?php echo strtolower($activity['request_status']); ?>">
+                                <?php echo ucfirst($activity['request_status']); ?>
                               </span>
                             </div>
                           </div>

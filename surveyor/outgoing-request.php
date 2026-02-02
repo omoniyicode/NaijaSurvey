@@ -1,3 +1,50 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'surveyor') {
+    header("Location: ../login.php");
+    exit();
+}
+
+if (!isset($_GET['id'])) {
+    header("Location: outgoing-requests.php");
+    exit();
+}
+
+require_once "../config/db-connect.php";
+require_once "../models/SurveyorProfile.php";
+require_once "../models/Request.php";
+
+$account_id = $_SESSION['id'];
+$request_id = (int) $_GET['id'];
+
+// get surveyor profile
+$surveyorProfileModel = new SurveyorProfile();
+$profile = $surveyorProfileModel->getSurveyorProfileByAccountId($account_id, $pdo);
+
+if (!$profile) {
+    header("Location: profile.php");
+    exit();
+}
+
+$surveyor_profile_id = $profile['id'];
+
+// get outgoing request details (surveyor → client)
+$requestModel = new Request();
+$request = $requestModel->getSurveyorOutgoingRequestById(
+    $request_id,
+    $surveyor_profile_id,
+    $pdo
+);
+
+if (!$request) {
+    header("Location: outgoing-requests.php");
+    exit();
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -54,11 +101,13 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Request Status</strong>
-                  <span class="status-badge pending">Pending</span>
+                 <span class="status-badge <?= strtolower($request['request_status']) ?>">
+                    <?= ucfirst($request['request_status']) ?>
+                 </span>
                 </div>
                 <div class="detail-item">
                   <strong>Sent At</strong>
-                  <span>14 Jan 2026, 10:10 AM</span>
+                  <span><?= date('d M Y, h:i A', strtotime($request['created_at'])) ?></span>
                 </div>
               </div>
             </div>
@@ -73,23 +122,23 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Job Title</strong>
-                  <span>Boundary Survey for Residential Plot</span>
+                 <span><?= htmlspecialchars($request['job_title']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Service Type</strong>
-                  <span>Boundary Survey</span>
+                  <span><?= htmlspecialchars($request['service_category'] ?? 'N/A') ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>State</strong>
-                  <span>Benue, Nigeria</span>
+                  <span><?= htmlspecialchars($request['job_state']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>L.G.A</strong>
-                  <span>Makurdi</span>
+                 <span><?= htmlspecialchars($request['job_lga']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Address</strong>
-                  <span>No. 45 GRA</span>
+                  <span><?= htmlspecialchars($request['job_address']) ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Land Size</strong>
@@ -97,11 +146,13 @@
                 </div>
                 <div class="detail-item">
                   <strong>Proposed Budget</strong>
-                  <span class="text-success fw-bold">₦150,000 – ₦250,000</span>
+                 <span class="text-success fw-bold">
+                    ₦<?= number_format($request['proposed_budget']) ?>
+                 </span>
                 </div>
                 <div class="detail-item">
                   <strong>Expected Start</strong>
-                  <span>20 Feb 2026</span>
+                  <span><?= date('d M Y', strtotime($request['created_at'])) ?></span>
                 </div>
               </div>
             </div>
@@ -113,7 +164,9 @@
               <h3 class="detail-section-title">
                 <i class="bi bi-file-text-fill"></i> Job Description
               </h3>
-              <p class="text-muted">Client needs a professional boundary survey for land documentation.</p>
+              <p class="text-muted">
+                <?= nl2br(htmlspecialchars($request['job_description'])) ?>
+              </p>
             </div>
 
             <hr>
@@ -127,19 +180,22 @@
                 <div class="detail-grid">
                   <div class="detail-item">
                     <strong>Client Name</strong>
-                    <span>Ade Johnson</span>
+                    <span><?= htmlspecialchars($request['first_name'] . ' ' . $request['surname']) ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>Contact</strong>
-                    <span>0802 555 8899</span>
+                    <span><?= htmlspecialchars($request['phone_number']) ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>Address</strong>
-                    <span>No.45 Makurdi Benue</span>
+                    <span><?= htmlspecialchars($request['address']) ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>Status</strong>
-                    <span class="text-success fw-bold">Active Client</span>
+                    <span class="text-success fw-bold">
+                      <?= ucfirst($request['verification_status']) ?> Client
+                    </span>
+
                   </div>
                 </div>
               </div>

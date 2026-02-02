@@ -1,3 +1,36 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'client') {
+    header("Location: ../login.php");
+    exit();
+}
+
+require_once "../config/db-connect.php";
+require_once "../models/ClientProfile.php";
+require_once "../models/Request.php";
+
+// account id
+$account_id = $_SESSION['id'];
+
+// get client profile
+$clientProfileModel = new ClientProfile();
+$profile = $clientProfileModel->getClientProfileByAccountId($account_id, $pdo);
+
+if (!$profile) {
+    header("Location: profile.php");
+    exit();
+}
+
+$client_profile_id = $profile['id'];
+
+// get outgoing requests (client → surveyors)
+$requestModel = new Request();
+$outgoingRequests = $requestModel->getClientOutgoingRequests($client_profile_id, $pdo);
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -52,48 +85,41 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>PrimeGeo Surveys Ltd</td>
-              <td>Boundary Survey</td>
-              <td><span class="status-badge pending">Pending</span></td>
-              <td>
-                <a href="outgoing-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Atlas Mapping Co.</td>
-              <td>Topographic Survey</td>
-              <td><span class="status-badge accepted">Accepted</span></td>
-              <td>
-                <a href="outgoing-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Atlas Mapping Co.</td>
-              <td>Topographic Survey</td>
-              <td><span class="status-badge rejected">Rejected</span></td>
-              <td>
-                <a href="outgoing-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td>Atlas Mapping Co.</td>
-              <td>Topographic Survey</td>
-              <td><span class="status-badge completed">Completed</span></td>
-              <td>
-                <a href="outgoing-request.php" class="btn btn-sm btn-primary">
-                  <i class="bi bi-eye me-1"></i> View
-                </a>
-              </td>
-            </tr>
+         <tbody>
+            <?php if (empty($outgoingRequests)): ?>
+              <tr>
+                <td colspan="4" class="text-center text-muted">
+                  You have not sent any requests yet.
+                </td>
+              </tr>
+            <?php else: ?>
+              <?php foreach ($outgoingRequests as $request): ?>
+                <tr>
+                  <td>
+                    <?= htmlspecialchars($request['first_name'] . ' ' . $request['surname']) ?>
+                  </td>
+
+                  <td>
+                    <?= htmlspecialchars($request['service_category']) ?>
+                  </td>
+
+                  <td>
+                    <span class="status-badge <?= strtolower($request['request_status']) ?>">
+                      <?= ucfirst($request['request_status']) ?>
+                    </span>
+                  </td>
+
+                  <td>
+                    <a href="outgoing-request.php?id=<?= $request['id'] ?>" 
+                      class="btn btn-sm btn-primary">
+                      <i class="bi bi-eye me-1"></i> View
+                    </a>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
+
         </table>
       </div>
 

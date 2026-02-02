@@ -1,5 +1,5 @@
 <?php
-// Full Landing Page - Survey Connect (Responsive Bootstrap)
+session_start();
 ?>
 
 <!DOCTYPE html>
@@ -35,16 +35,16 @@
 
       <!-- Section-style title -->
       <h2 class="section-title text-center">
-        About SurveyConnect
+        About Naija Survey
       </h2>
 
       <p class="lead mt-4">
-        <b><strong>SurveyConnect is a trusted digital platform</strong> created to solve one of the biggest problems
+        <b><strong>Naija Survey is a trusted digital platform</strong> created to solve one of the biggest problems
         in Nigeria’s land sector — the difficulty of finding verified, licensed surveyors without
         relying on referrals, guesswork, or risky trial-and-error.</b>
       </p>
       <p class="lead mt-4">
-        <b>SurveyConnect was built to remove uncertainty from land transactions by creating a single,
+        <b>Naija survey was built to remove uncertainty from land transactions by creating a single,
         trusted space where only verified, licensed surveyors can connect with clients. By combining verification, transparency, and direct communication, we help property owners make safer decisions while giving qualified professionals the visibility and credibility they deserve. </b>
       </p>
 
@@ -70,14 +70,14 @@
 
 <!-- Why SurveyConnect -->
 <section class="section" style="background:#eef5ef;">
-  <h2 class="section-title">Why SurveyConnect?</h2>
+  <h2 class="section-title">Why Naija Survey?</h2>
 
   <div class="masonry">
     <div class="card bg-success">
       <h4 class="text-white"><b>For Clients</b></h4>
       <p class="text-white">
         Property owners struggle to identify genuine surveyors and fear falling
-        victim to fraudulent survey plans. SurveyConnect provides instant access
+        victim to fraudulent survey plans. Naija Survey provides instant access
         to verified professionals you can trust.
       </p>
     </div>

@@ -1,3 +1,79 @@
+<?php
+session_start();
+
+require_once "config/db-connect.php";
+require_once "models/SurveyorProfile.php";
+require_once "models/ClientProfile.php";
+require_once "models/Request.php";
+
+/* Validate surveyor ID (GET) */
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: surveyor-listing.php");
+    exit();
+}
+
+$surveyor_id = (int) $_GET['id'];
+
+/* Fetch verified surveyor profile */
+$surveyorModel = new SurveyorProfile();
+$surveyor = $surveyorModel->getVerifiedSurveyorById($surveyor_id, $pdo);
+
+if (!$surveyor) {
+    header("Location: surveyor-listing.php");
+    exit();
+}
+
+/* Handle "Contact Surveyor" form submission (POST) */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_surveyor'])) {
+
+    // must be logged in as client
+    if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'client') {
+        header("Location: login.php");
+        exit();
+    }
+
+    // get client profile
+    $clientProfileModel = new ClientProfile();
+    $clientProfile = $clientProfileModel->getClientProfileByAccountId(
+        $_SESSION['id'],
+        $pdo
+    );
+
+    if (!$clientProfile) {
+        header("Location: client/profile.php");
+        exit();
+    }
+
+    // sanitize inputs
+    $service_category     = trim($_POST['service_category']);
+    $project_state        = trim($_POST['project_state']);
+    $project_lga          = trim($_POST['project_lga']);
+    $project_address      = trim($_POST['project_address']);
+    $estimated_budget     = trim($_POST['estimated_budget']);
+    $project_description  = trim($_POST['project_description']);
+
+    // create request
+    $requestModel = new Request();
+    $requestModel->createRequestToSurveyor(
+        $clientProfile['id'],      // client_profile_id
+        $surveyor['id'],           // surveyor_profile_id
+        $service_category,
+        $project_state,
+        $project_lga,
+        $project_address,
+        $estimated_budget,
+        $project_description,
+        $pdo
+    );
+
+    // redirect to client outgoing requests
+    header("Location: client/outgoing-requests.php");
+    exit();
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,7 +98,9 @@
         <div class="row align-items-center">
           <div class="col-lg-3 col-md-4 text-center text-md-start">
             <div class="profile-avatar-large">
-              <img src="assets/images/confidence.jpg" alt="John Adewale" class="profile-img">
+              <img src="uploads/profile_images/<?php echo htmlspecialchars($surveyor['profile_image']); ?>"
+                  alt="<?php echo htmlspecialchars($surveyor['first_name']); ?>"
+                  class="profile-img">
               <span class="verified-badge-large">
                 <i class="bi bi-patch-check-fill"></i>
               </span>
@@ -30,21 +108,31 @@
           </div>
           
           <div class="col-lg-6 col-md-8 mt-3 mt-md-0">
-            <h1 class="profile-name">John Adewale</h1>
-            <p class="profile-title">Licensed Land Surveyor</p>
+           <h1 class="profile-name">
+              <?php echo htmlspecialchars($surveyor['first_name'] . ' ' . $surveyor['surname']); ?>
+           </h1>
+            <p class="profile-title">
+              <?php echo htmlspecialchars($surveyor['specialization']); ?>
+            </p>
             
             <div class="profile-meta">
               <div class="meta-item">
                 <i class="bi bi-geo-alt-fill"></i>
-                <span>Lagos, Nigeria</span>
+               <span>
+                  <?php echo htmlspecialchars($surveyor['state']); ?>, Nigeria
+               </span>
               </div>
               <div class="meta-item">
                 <i class="bi bi-award-fill"></i>
-                <span>License: S123456789</span>
+                <span>
+                  License: <?php echo htmlspecialchars($surveyor['surcon_number']); ?>
+                </span>
               </div>
               <div class="meta-item">
                 <i class="bi bi-briefcase-fill"></i>
-                <span>10+ Years Experience</span>
+                <span>
+                  <?php echo (int)$surveyor['years_of_experience']; ?>+ Years Experience
+                </span>
               </div>
             </div>
 
@@ -55,9 +143,13 @@
                 <i class="bi bi-star-fill text-warning"></i>
                 <i class="bi bi-star-fill text-warning"></i>
                 <i class="bi bi-star-half text-warning"></i>
-                <span class="rating-number-large">4.8</span>
+                <span class="rating-number-large">
+                  <?php echo $surveyor['rating']; ?>
+                </span>
               </div>
-              <span class="reviews-text">(128 reviews)</span>
+              <span class="reviews-text">
+                (<?php echo (int)$surveyor['reviews_count']; ?> reviews)
+              </span>
             </div>
           </div>
 
@@ -143,7 +235,7 @@
               <i class="bi bi-person-circle me-2"></i>About
             </h3>
             <p class="text-muted">
-              Experienced land surveyor with over 10 years of expertise in boundary surveys, topographic mapping, and cadastral surveys. Committed to delivering accurate and reliable survey services to clients across Lagos and neighboring states. Member of the Nigerian Institution of Surveyors (NIS) and fully licensed by SURCON.
+              <?php echo nl2br(htmlspecialchars($surveyor['bio'])); ?>
             </p>
             <div class="specializations">
               <h5 class="mb-3">Specializations</h5>
@@ -324,21 +416,21 @@
               <i class="bi bi-telephone-fill"></i>
               <div>
                 <small>Phone</small>
-                <p>+234 801 234 5678</p>
+                <p><?php echo htmlspecialchars($surveyor['phone_number']); ?></p>
               </div>
             </div>
             <div class="contact-item">
               <i class="bi bi-envelope-fill"></i>
               <div>
                 <small>Email</small>
-                <p>john.adewale@email.com</p>
+                <p><?php echo htmlspecialchars($surveyor['email']); ?></p>
               </div>
             </div>
             <div class="contact-item">
               <i class="bi bi-geo-alt-fill"></i>
               <div>
                 <small>Location</small>
-                <p>Lagos State, Nigeria</p>
+                <p><?php echo htmlspecialchars($surveyor['state']); ?> State, Nigeria</p>
               </div>
             </div>
           </div>
@@ -350,7 +442,7 @@
               <i class="bi bi-patch-check-fill text-success"></i>
               <div>
                 <h6>SURCON Licensed</h6>
-                <small>License No: S123456789</small>
+                 <p><?php echo htmlspecialchars($surveyor['surcon_number']); ?></p>
               </div>
             </div>
             <div class="certification-item">
@@ -400,86 +492,53 @@
       <div class="modal-content">
         
         <div class="modal-header">
-          <h5 class="modal-title">Contact John Adewale</h5>
+          <h5 class="modal-title">Contact: <?php echo htmlspecialchars($surveyor['first_name'] . ' ' . $surveyor['surname']); ?></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
           
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Service Needed</label>
-            <select class="form-select" id="serviceSelect">
-              <option value="">Select service type</option>
-              <option>Bathymetric Mapping</option>
-              <option>Bill of Quantities (BOQ)</option>
-              <option>Boundary Survey</option>
-              <option>Certificate of Occupancy (C of O)</option>
-              <option>Contour Mapping</option>
-              <option>Cost Estimation</option>
-              <option>Elevation & Slope Data</option>
-              <option>GIS Database Creation</option>
-              <option>GPS / GNSS Measurements</option>
-              <option>Land Demarcation</option>
-              <option>Mining Layout & Monitoring</option>
-              <option>National & Regional Mapping</option>
-              <option>Property Subdivision</option>
-              <option>Quarry Surveys</option>
-              <option>Site Layout</option>
-              <option>Spatial Data Analysis</option>
-              <option>Terrain Analysis</option>
-              <option>Title & Land Ownership Verification</option>
-              <option>Topographic Survey</option>
-              <option>Volume Calculations</option>
-              <option value="other">Other (Specify below)</option>
-            </select>
-          </div>
+          <form method="post">
+            <input type="hidden" name="contact_surveyor" value="1">
 
-          <div class="mb-3 d-none" id="otherServiceBox">
-            <label class="form-label fw-semibold">Specify Service</label>
-            <input type="text" class="form-control" placeholder="Enter your specific service need">
-          </div>
+            <input type="hidden" name="project_state" value="<?= htmlspecialchars($surveyor['state']) ?>">
 
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Project Location</label>
-            <input type="text" class="form-control" placeholder="Enter project location">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Estimated Budget</label>
-            <select class="form-select">
-              <option selected disabled>Select budget range</option>
-              <option>₦50,000 – ₦100,000</option>
-              <option>₦100,000 – ₦250,000</option>
-              <option>₦250,000 – ₦500,000</option>
-              <option>₦500,000+</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Project Description</label>
-            <textarea class="form-control" rows="4" placeholder="Describe your project requirements in detail..."></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Your Contact Information</label>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <input type="text" class="form-control" placeholder="Your Name">
-              </div>
-              <div class="col-md-6">
-                <input type="tel" class="form-control" placeholder="Phone Number">
-              </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Service Needed</label>
+              <select class="form-select" name="service_category" required>
+                <option value="">Select service type</option>
+                <option>Boundary Survey</option>
+                <option>Topographic Survey</option>
+                <option>Site Layout</option>
+                <option>GIS Survey</option>
+                <option value="other">Other</option>
+              </select>
             </div>
-          </div>
 
-        </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Project LGA</label>
+              <input type="text" class="form-control" name="project_lga" required>
+            </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-gold">
-            <i class="bi bi-send me-2"></i>Send Request
-          </button>
-        </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Project Address</label>
+              <input type="text" class="form-control" name="project_address" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Estimated Budget</label>
+              <input type="text" class="form-control" name="estimated_budget" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Project Description</label>
+              <textarea class="form-control" rows="4" name="project_description" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-gold">
+              <i class="bi bi-send me-2"></i>Send Request
+            </button>
+          </form>
 
       </div>
     </div>
