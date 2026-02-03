@@ -1,3 +1,60 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+require_once "../config/db-connect.php";
+
+/* ==========================
+   DASHBOARD STATISTICS
+========================== */
+
+// total users (clients + surveyors)
+$stmt = $pdo->query("SELECT COUNT(*) FROM accounts");
+$totalUsers = $stmt->fetchColumn();
+
+// verified surveyors
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM surveyors_profile 
+    WHERE verification_status = 'verified'
+");
+$stmt->execute();
+$verifiedSurveyors = $stmt->fetchColumn();
+
+// total jobs
+$stmt = $pdo->query("SELECT COUNT(*) FROM jobs");
+$totalJobs = $stmt->fetchColumn();
+
+// pending reviews (NOT IMPLEMENTED YET)
+$pendingReviews = 0;
+
+/* ==========================
+   RECENT ACTIVITIES
+========================== */
+
+// recent surveyor verifications
+$recentSurveyors = $pdo->query("
+    SELECT first_name, surname, verified_at 
+    FROM surveyors_profile 
+    WHERE verification_status = 'verified'
+    ORDER BY verified_at DESC
+    LIMIT 3
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// recent jobs
+$recentJobs = $pdo->query("
+    SELECT j.job_title, j.created_at, c.first_name, c.surname
+    FROM jobs j
+    JOIN clients_profile c ON j.client_profile_id = c.id
+    ORDER BY j.created_at DESC
+    LIMIT 3
+")->fetchAll(PDO::FETCH_ASSOC);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +68,8 @@
 </head>
 <body>
 
-<?php include "../includes/nav.php"; ?>
-<?php include "../includes/admin-dashboard.php"; ?>
+<?php include __DIR__ . '/../components/nav.php'; ?>
+<?php include __DIR__ . '/../components/admin-sidebar.php'; ?>
 
 <div class="container-fluid px-6 px-md-4 main">
 
@@ -20,27 +77,26 @@
   <div class="row g-3">
     <div class="col-md-3"><div class="stat-card active" data-box="users">
       <div class="icon-circle users"><span class="material-symbols-outlined">group</span></div>
-      <div class="stat-label">Total Users</div><div class="stat-value">1,248</div>
+      <div class="stat-label">Total Users</div><div class="stat-value"><?php echo number_format($totalUsers); ?></div>
     </div></div>
 
     <div class="col-md-3"><div class="stat-card" data-box="verified">
       <div class="icon-circle verified"><span class="material-symbols-outlined">verified</span></div>
-      <div class="stat-label">Verified Surveyors</div><div class="stat-value">312</div>
+      <div class="stat-label">Verified Surveyors</div><div class="stat-value"><?php echo number_format($verifiedSurveyors); ?></div>
     </div></div>
 
     <div class="col-md-3"><div class="stat-card" data-box="jobs">
       <div class="icon-circle jobs"><span class="material-symbols-outlined">folder</span></div>
-      <div class="stat-label">Total Jobs</div><div class="stat-value">876</div>
+      <div class="stat-label">Total Jobs</div><div class="stat-value"><?php echo number_format($totalJobs); ?></div>
     </div></div>
 
     <div class="col-md-3"><div class="stat-card" data-box="reviews">
       <div class="icon-circle reviews"><span class="material-symbols-outlined">star</span></div>
-      <div class="stat-label">Pending Reviews</div><div class="stat-value">14</div>
+      <div class="stat-label">Pending Reviews</div><div class="stat-value"><?php echo number_format($pendingReviews); ?></div>
     </div></div>
   </div>
 
   <!-- DYNAMIC CONTENT -->
-  <div class="content-card" id="contentArea"></div>
 
   <!-- RECENT ACTIVITIES TABLE -->
   <div class="recent">
@@ -51,76 +107,32 @@
           <tr><th>Activity</th><th>User</th><th>Date</th><th>Status</th></tr>
         </thead>
         <tbody>
-          <tr><td>Surveyor Verification</td><td>Musa Lawal</td><td>22 Dec 2025</td>
-            <td><span class="badge badge-approved">Approved</span></td></tr>
-          <tr><td>New Job Posted</td><td>Grace O.</td><td>21 Dec 2025</td>
-            <td><span class="badge badge-new">New</span></td></tr>
-          <tr><td>Review Submitted</td><td>John A.</td><td>20 Dec 2025</td>
-            <td><span class="badge badge-pending">Pending</span></td></tr>
+
+          <?php foreach ($recentSurveyors as $s): ?>
+            <tr>
+              <td>Surveyor Verification</td>
+              <td><?php echo htmlspecialchars($s['first_name'].' '.$s['surname']); ?></td>
+              <td><?php echo date("d M Y", strtotime($s['verified_at'])); ?></td>
+              <td><span class="badge badge-approved">Approved</span></td>
+            </tr>
+          <?php endforeach; ?>
+
+          <?php foreach ($recentJobs as $j): ?>
+            <tr>
+              <td>New Job Posted</td>
+              <td><?php echo htmlspecialchars($j['first_name'].' '.$j['surname']); ?></td>
+              <td><?php echo date("d M Y", strtotime($j['created_at'])); ?></td>
+              <td><span class="badge badge-new">New</span></td>
+            </tr>
+          <?php endforeach; ?>
+
         </tbody>
+
       </table>
     </div>
   </div>
 
 </div>
-
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-box">
-    <h6 id="popName"></h6>
-    <p id="popInfo"></p>
-    <button class="btn btn-secondary btn-sm w-100" onclick="closePopup()">Close</button>
-  </div>
-</div>
-
-<script>
-const content=document.getElementById('contentArea');
-const popup=document.getElementById('popup');
-const popName=document.getElementById('popName');
-const popInfo=document.getElementById('popInfo');
-
-function openPopup(name,info){
-  popName.innerText=name;
-  popInfo.innerText=info;
-  popup.style.display='flex';
-}
-function closePopup(){popup.style.display='none';}
-
-function loadUsers(){
-  content.innerHTML=`
-    <div class="list-item" onclick="openPopup('John Doe','Email: john@mail.com | Joined: 2024')">John Doe</div>
-    <div class="list-item" onclick="openPopup('Grace O.','Email: grace@mail.com | Joined: 2023')">Grace O.</div>`;
-}
-function loadVerified(){
-  content.innerHTML=`
-    <div class="list-item" onclick="openPopup('Surveyor Musa','License: SURV-221 | State: Lagos')">Surveyor Musa</div>`;
-}
-function loadJobs(){content.innerHTML='<p>No job selected</p>';}
-function loadReviews(){content.innerHTML='<p>Pending reviews list</p>';}
-
-document.querySelectorAll('.stat-card').forEach(card=>{
-  card.onclick=()=>{
-    document.querySelectorAll('.stat-card').forEach(c=>c.classList.remove('active'));
-    card.classList.add('active');
-    if(card.dataset.box==='users') loadUsers();
-    if(card.dataset.box==='verified') loadVerified();
-    if(card.dataset.box==='jobs') loadJobs();
-    if(card.dataset.box==='reviews') loadReviews();
-  };
-});
-
-loadUsers();
-
-function openSidebar(){
-  document.getElementById('adminSidebar').classList.add('show');
-  document.getElementById('sidebarOverlay').classList.add('show');
-}
-
-function closeSidebar(){
-  document.getElementById('adminSidebar').classList.remove('show');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-}
-</script>
 
 
 </body>

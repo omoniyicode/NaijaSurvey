@@ -1,3 +1,10 @@
+<?php
+session_start();
+if(isset($_SESSION['is_admin']) && $_SESSION['is_admin']){
+    header('Location: dashboard.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,20 +70,25 @@ body{
     <p class="text-muted mb-0">SurveyConnect Control Panel</p>
   </div>
 
+  <!-- SHOW ERROR IF ANY -->
+  <?php if(isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger"><?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
+  <?php endif; ?>
+
   <!-- LOGIN FORM -->
-  <form method="post" action="">
+  <form method="post" action="../processes/admin-login-process.php">
     
     <div class="mb-3">
       <label class="form-label">Email Address</label>
-      <input type="email" class="form-control" placeholder="admin@surveyconnect.com" required>
+      <input type="email" name="email" class="form-control" placeholder="admin@surveyconnect.com" required>
     </div>
 
     <div class="mb-3">
       <label class="form-label">Password</label>
-      <input type="password" class="form-control" placeholder="••••••••" required>
+      <input type="password" name="password" class="form-control" placeholder="••••••••" required>
     </div>
 
-    <button type="submit" class="btn btn-admin w-100">
+    <button type="submit" name="admin_login" class="btn btn-admin w-100">
       <i class="fa fa-lock me-1"></i> Login
     </button>
 

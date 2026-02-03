@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 02, 2026 at 06:00 PM
+-- Generation Time: Feb 03, 2026 at 02:08 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -51,6 +51,30 @@ INSERT INTO `accounts` (`id`, `email`, `password`, `user_type`, `status`, `creat
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `admins`
+--
+
+DROP TABLE IF EXISTS `admins`;
+CREATE TABLE IF NOT EXISTS `admins` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id`, `email`, `password`, `status`, `created_at`) VALUES
+(1, 'admin@surveyconnect.com', '$2y$10$O3xlIHpjbTUIpfZtFTO0uOiWLJm6fTYlm6K01tcinsrWAjhRwH0JK', 'active', '2026-02-02 10:32:32');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `clients_profile`
 --
 
@@ -83,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `clients_profile` (
 --
 
 INSERT INTO `clients_profile` (`id`, `account_id`, `first_name`, `surname`, `other_names`, `phone_number`, `whatsapp_number`, `bio`, `state`, `lga`, `address`, `profile_image`, `id_type`, `id_document`, `verification_status`, `verified_at`, `created_at`, `updated_at`) VALUES
-(1, 2, 'Jane', 'Doe', 'Jee', '09012345678', '09012345678', 'I am a client', 'Benue', 'APA', 'Just APA', 'profile_image697b0c2a465d3_1769671722.jpg', 'voters_card', 'id_697b0c2a4696a_1769671722.pdf', 'pending', '2026-01-29 08:28:42', '2026-01-29 08:28:42', '2026-01-29 08:31:23'),
+(1, 2, 'Jane', 'Doe', 'Jee', '09012345678', '09012345678', 'I am a client', 'Benue', 'APA', 'Just APA', 'profile_image697b0c2a465d3_1769671722.jpg', 'voters_card', 'id_697b0c2a4696a_1769671722.pdf', 'pending', '2026-01-29 08:28:42', '2026-01-29 08:28:42', '2026-02-02 13:08:18'),
 (2, 4, 'Ab father', 'omoniyi', 'na we', '09165478081', '09165478081', 'de genttle', 'benue', 'otukpo', 'no 10 jimark avenue', 'profile_image697d3a3b039e5_1769814587.jpeg', 'voters_card', 'id_697d3a12239da_1769814546.jpg', 'verified', '2026-01-30 12:09:06', '2026-01-30 12:09:06', '2026-02-01 00:40:11');
 
 -- --------------------------------------------------------
@@ -142,10 +166,8 @@ INSERT INTO `jobs` (`id`, `client_profile_id`, `job_title`, `job_description`, `
 (12, 1, 'Boundary Survey for Residential Land', 'Boundary survey required for a 2-plot residential land.', '250000', 'Lagos', 'Ikeja', 'Opebi Street', 'available', '2026-01-31 03:18:05'),
 (13, 2, 'Topographic Survey for Construction', 'Topographic survey needed before construction begins.', '400000', 'Abuja', 'Gwarimpa', '3rd Avenue', 'available', '2026-01-31 03:18:05'),
 (14, 1, 'GIS Mapping Project', 'GIS mapping for agricultural land documentation.', '600000', 'Benue', 'Makurdi', 'High Level Area', 'available', '2026-01-31 03:18:05'),
-(15, 2, 'Site Layout Survey', 'Site layout survey for proposed shopping complex.', '350000', 'Rivers', 'Port Harcourt', 'Ada George Road', 'available', '2026-01-31 03:18:05'),
 (16, 1, 'Boundary Survey – Farmland', 'Boundary survey for large farmland area.', '500000', 'Kaduna', 'Zaria', 'Samaru Road', 'available', '2026-01-31 03:18:05'),
 (17, 2, 'Topographic Survey – Highway Project', 'Topographic survey for road expansion project.', '850000', 'Oyo', 'Ibadan North', 'Bodija Area', 'available', '2026-01-31 03:18:05'),
-(18, 1, 'Land Verification Survey', 'Verification survey for land ownership confirmation.', '200000', 'Ogun', 'Abeokuta South', 'Sapon Area', 'available', '2026-01-31 03:18:05'),
 (19, 2, 'GIS Survey – Urban Planning', 'GIS data collection for urban planning project.', '700000', 'Lagos', 'Eti-Osa', 'Lekki Phase 1', 'available', '2026-01-31 03:18:05'),
 (20, 1, 'Site Layout for Residential Estate', 'Layout survey for a new residential estate.', '950000', 'Anambra', 'Awka South', 'Ifite Area', 'available', '2026-01-31 03:18:05'),
 (21, 2, 'boundary survey', 'my first job', '28000', 'benue', 'otukpo', 'apka street', 'taken', '2026-02-01 00:42:18');
@@ -273,9 +295,9 @@ CREATE TABLE IF NOT EXISTS `surveyors_profile` (
 INSERT INTO `surveyors_profile` (`id`, `account_id`, `first_name`, `surname`, `other_names`, `phone_number`, `whatsapp_number`, `years_of_experience`, `bio`, `state`, `lga`, `address`, `profile_image`, `id_type`, `id_document`, `surcon_number`, `specialization`, `verification_status`, `verified_at`, `created_at`, `updated_at`, `rating`, `reviews_count`) VALUES
 (1, 1, 'John', 'Doe', 'Deed', '09123456789', '09123456789', 2, 'I am a surveyor', 'Benue', 'Otukpo', 'GRA', 'profile_697a272ee0fd8_1769613102.png', 'id_card', 'id_697a2476efc73_1769612406.pdf', '212356BN6QW', 'Land & Boundary Survey', 'verified', '2026-01-28 16:00:06', '2026-01-28 16:00:06', '2026-01-31 11:57:36', 4.8, 45),
 (2, 3, 'Godsown', 'Omoniyi', 'Abraham', '09165478081', '09165478081', 5, 'I\'m a professional', 'benue', 'otukpo', 'no 10 jimark avenue', 'profile_697e95fc990a6_1769903612.png', 'surcon_slip', 'id_697e95fc997c5_1769903612.jpg', 'sur-50330', 'Engineering Survey', 'verified', '2026-01-30 09:57:45', '2026-01-30 09:57:45', '2026-01-31 12:57:27', 3.9, 19),
-(21, 1, 'Samuel', 'Okoro', NULL, '08011112222', '08011112222', 10, 'Experienced land and boundary surveyor with residential and commercial projects.', 'Lagos', 'Ikeja', 'Ikeja GRA', 'samuel.png', 'surcon_slip', 'samuel_id.pdf', 'SUR-10001', 'Land & Boundary Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-01-31 13:52:37', 4.8, 45),
-(22, 2, 'Aisha', 'Bello', NULL, '08022223333', '08022223333', 8, 'Engineering survey specialist with infrastructure and road projects experience.', 'Abuja', 'Gwagwalada', 'Phase 2', 'aisha.png', 'surcon_slip', 'aisha_id.pdf', 'SUR-10002', 'Engineering Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-01-31 13:52:37', 5.0, 62),
-(23, 3, 'Ibrahim', 'Musa', NULL, '08033334444', '08033334444', 12, 'Topographic surveyor with advanced mapping and terrain analysis skills.', 'Kaduna', 'Chikun', 'Sabon Tasha', 'ibrahim.png', 'surcon_slip', 'ibrahim_id.pdf', 'SUR-10003', 'Topographic Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-01-31 13:52:37', 4.5, 38),
+(21, 1, 'Samuel', 'Okoro', NULL, '08011112222', '08011112222', 10, 'Experienced land and boundary surveyor with residential and commercial projects.', 'Lagos', 'Ikeja', 'Ikeja GRA', 'samuel.png', 'surcon_slip', 'samuel_id.pdf', 'SUR-10001', 'Land & Boundary Survey', 'pending', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-02 13:03:20', 4.8, 45),
+(22, 2, 'Aisha', 'Bello', NULL, '08022223333', '08022223333', 8, 'Engineering survey specialist with infrastructure and road projects experience.', 'Abuja', 'Gwagwalada', 'Phase 2', 'aisha.png', 'surcon_slip', 'aisha_id.pdf', 'SUR-10002', 'Engineering Survey', 'pending', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-02 12:13:37', 5.0, 62),
+(23, 3, 'Ibrahim', 'Musa', NULL, '08033334444', '08033334444', 12, 'Topographic surveyor with advanced mapping and terrain analysis skills.', 'Kaduna', 'Chikun', 'Sabon Tasha', 'ibrahim.png', 'surcon_slip', 'ibrahim_id.pdf', 'SUR-10003', 'Topographic Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-02 12:39:13', 2.0, 38),
 (24, 4, 'Chidinma', 'Okafor', NULL, '08044445555', '08044445555', 15, 'Cadastral survey expert with land registry and documentation experience.', 'Rivers', 'Obio-Akpor', 'Rumuola', 'chidinma.png', 'surcon_slip', 'chidinma_id.pdf', 'SUR-10004', 'Cadastral Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-01-31 13:52:37', 4.9, 71);
 
 --

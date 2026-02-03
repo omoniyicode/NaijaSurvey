@@ -40,7 +40,7 @@ if (isset($_SESSION['id'], $_SESSION['user_type'])) {
                 <ul class="footer-links">
                     <li><a href="register.php">Register as Surveyor</a></li>
                     <li><a href="<?php echo $dashboardLink; ?>">Dashboard</a></li>
-                    <li><a href="post-job-public.php">Post a Job</a></li>
+                    <li><a href="#">Post a Job</a></li>
                 </ul>
             </div>
             

@@ -53,7 +53,7 @@
 
       <div class="nav-title">
         <h6>Admin Dashboard</h6>
-        <small>SurveyConnect platform overview</small>
+        <small>Naija Survey platform overview</small>
       </div>
     </div>
 

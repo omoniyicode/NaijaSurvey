@@ -1,3 +1,56 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['id']) || $_SESSION['user_type'] !== 'surveyor') {
+    header("Location: ../login.php");
+    exit();
+}
+
+require_once "../config/db-connect.php";
+require_once "../models/SurveyorProfile.php";
+require_once "../models/Request.php";
+
+// validate request id
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: incoming-requests.php");
+    exit();
+}
+
+$request_id = (int) $_GET['id'];
+$account_id = $_SESSION['id'];
+
+// get surveyor profile
+$surveyorModel = new SurveyorProfile();
+$surveyorProfile = $surveyorModel->getSurveyorProfileByAccountId($account_id, $pdo);
+
+if (!$surveyorProfile) {
+    header("Location: profile.php");
+    exit();
+}
+
+$surveyor_profile_id = $surveyorProfile['id'];
+
+// get request details
+$requestModel = new Request();
+$request = $requestModel->getSurveyorIncomingRequestById(
+    $request_id,
+    $surveyor_profile_id,
+    $pdo
+);
+
+if (!$request) {
+    header("Location: incoming-requests.php");
+    exit();
+}
+
+// client profile image (fallback safe)
+$clientImage = !empty($request['profile_image'])
+    ? "../uploads/profile_images/" . $request['profile_image']
+    : "../assets/images/client_avatar.jpg";
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,7 +99,14 @@
           <div class="request-detail-card">
             
             <!-- Job Image -->
-            <img src="../assets/images/boundary survey job.png" alt="Job" class="job-image">
+            <img 
+              src="<?php echo htmlspecialchars($clientImage); ?>" 
+              alt="Client"
+              class="job-image"
+              style="object-fit: cover;"
+            >
+
+
 
             <!-- Request Information -->
             <div class="detail-section">
@@ -56,11 +116,15 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Request Status</strong>
-                  <span class="status-badge pending">Pending</span>
+                  <span class="status-badge <?php echo strtolower($request['request_status']); ?>">
+                    <?php echo ucfirst($request['request_status']); ?>
+                  </span>
                 </div>
                 <div class="detail-item">
                   <strong>Created At</strong>
-                  <span>14 Jan 2026, 10:10 AM</span>
+                  <span>
+                    <?php echo date("d M Y, g:i A", strtotime($request['created_at'])); ?>
+                  </span>
                 </div>
               </div>
             </div>
@@ -79,31 +143,26 @@
                 </div>
                 <div class="detail-item">
                   <strong>Service Category</strong>
-                  <span>Boundary Survey</span>
+                  <span><?php echo htmlspecialchars($request['service_category']); ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>State</strong>
-                  <span>Benue, Nigeria</span>
+                  <span><?php echo htmlspecialchars($request['project_state']); ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>L.G.A</strong>
-                  <span>Makurdi</span>
+                  <span><?php echo htmlspecialchars($request['lga']); ?></span>
                 </div>
                 <div class="detail-item">
                   <strong>Address</strong>
-                  <span>No. 45 GRA</span>
+                  <span><?php echo htmlspecialchars($request['project_address']); ?></span>
                 </div>
-                <div class="detail-item">
-                  <strong>Land Size</strong>
-                  <span>600 sqm</span>
-                </div>
+               
                 <div class="detail-item">
                   <strong>Proposed Budget</strong>
-                  <span class="text-success fw-bold">₦150,000 – ₦250,000</span>
-                </div>
-                <div class="detail-item">
-                  <strong>Expected Start</strong>
-                  <span>20 Feb 2026</span>
+                  <span class="fw-bold text-success">
+                    ₦<?php echo number_format($request['estimated_budget']); ?>
+                  </span>
                 </div>
               </div>
             </div>
@@ -115,7 +174,10 @@
               <h3 class="detail-section-title">
                 <i class="bi bi-file-text-fill"></i> Job Description
               </h3>
-              <p class="text-muted">Client needs a professional boundary survey for land documentation. The property is located in a residential area with clear access.</p>
+              <p class="text-muted">
+                <?php echo nl2br(htmlspecialchars($request['project_description'])); ?>
+              </p>
+
             </div>
 
             <hr>
@@ -126,38 +188,43 @@
                 <i class="bi bi-person-fill"></i> Client Information
               </h3>
               <div class="client-info-box">
-                <img src="../assets/images/client_avatar.jpg" alt="Client" class="client-avatar">
+                <img src="<?php echo htmlspecialchars($clientImage); ?>" class="client-avatar">
                 <div class="verified-client mb-3">
                   <i class="bi bi-patch-check-fill"></i> Verified Client
                 </div>
                 <div class="detail-grid">
                   <div class="detail-item">
                     <strong>Name</strong>
-                    <span>Ade Johnson</span>
+                    <span>
+                      <?php echo htmlspecialchars($request['first_name'].' '.$request['surname']); ?>
+                    </span>
+
                   </div>
                   <div class="detail-item">
                     <strong>Phone</strong>
-                    <span>0802 555 8899</span>
+                    <span><?php echo htmlspecialchars($request['phone']); ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>WhatsApp</strong>
-                    <span>0802 555 8899</span>
+                    <span><?php echo htmlspecialchars($request['whatsapp_phone']); ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>State</strong>
-                    <span>Benue</span>
+                    <span><?php echo htmlspecialchars($request['state']); ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>L.G.A</strong>
-                    <span>Makurdi</span>
+                    <span><?php echo htmlspecialchars($request['lga']); ?></span>
                   </div>
                   <div class="detail-item">
                     <strong>Member Since</strong>
-                    <span>14 Jan 2026</span>
+                    <span><?php echo htmlspecialchars($request['created_at']); ?></span>
                   </div>
                 </div>
                 <div class="mt-3">
-                  <strong>Client Bio</strong>
+                  <p class="text-muted">
+                    <?php echo nl2br(htmlspecialchars($request['bio'])); ?>
+                  </p>
                   <p class="text-muted mt-2 mb-0">Professional real estate investor with multiple properties across Benue state. Looking for reliable and licensed surveyors for ongoing projects.</p>
                 </div>
               </div>
@@ -167,12 +234,13 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-              <button class="btn btn-accept">
-                <i class="bi bi-check-circle me-2"></i>Accept Job
-              </button>
-              <button class="btn btn-reject">
-                <i class="bi bi-x-circle me-2"></i>Reject Job
-              </button>
+              <form method="post" action="processes/update-request.php">
+                <input type="hidden" name="request_id" value="<?php echo $request_id; ?>">
+                <input type="hidden" name="action" value="accepted">
+                <button class="btn btn-success">
+                  <i class="bi bi-check-circle me-1"></i> Accept
+                </button>
+              </form>
               <button class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#deliverableModal">
                 <i class="bi bi-cloud-upload me-2"></i>Upload Deliverables
               </button>
