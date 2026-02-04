@@ -376,4 +376,52 @@ class Request{
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Upload deliverable
+    public function uploadDeliverable(
+        $request_id,
+        $surveyor_profile_id,
+        $file_path,
+        $note,
+        $pdo
+    ) {
+        $sql = "INSERT INTO request_deliverables 
+                (request_id, surveyor_profile_id, file_path, note)
+                VALUES (?, ?, ?, ?)";
+
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([
+            $request_id,
+            $surveyor_profile_id,
+            $file_path,
+            $note
+        ]);
+    }
+
+       public function updateSurveyorRequestStatus(
+        int $request_id,
+        int $surveyor_profile_id,
+        string $status,
+        PDO $pdo
+    ) {
+        $sql = "
+            UPDATE request_to_clients
+            SET request_status = ?
+            WHERE id = ?
+            AND surveyor_profile_id = ?
+            AND request_status = 'pending'
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            $status,
+            $request_id,
+            $surveyor_profile_id
+        ]);
+
+        return $stmt->rowCount(); // 👈 IMPORTANT
+    }
+
+
+
+
 }

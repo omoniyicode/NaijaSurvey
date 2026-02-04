@@ -230,34 +230,42 @@ if (!$request) {
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <form>
+          <form 
+            method="post"
+            action="processes/upload-deliverable.php"
+            enctype="multipart/form-data"
+          >
+            <input type="hidden" name="request_id" value="<?= $request_id ?>">
+            <input type="hidden" name="client_profile_id" value="<?= $request['client_profile_id'] ?>">
+
             <div class="mb-4">
               <label class="form-label fw-semibold">Upload Work Deliverable</label>
-              <div class="upload-deliverable-box">
-                <label class="upload-label">
-                  <i class="bi bi-cloud-upload fs-1 d-block mb-2"></i>
-                  Click to upload file
-                  <input type="file" accept=".pdf,.doc,.docx,.zip">
-                </label>
-                <p class="text-muted small mt-3 mb-0">
-                  Survey reports, images, drawings, signed documents, if applicable, all bundled as a single document (PDF
-                  preferred).
-                </p>
-              </div>
+              <input 
+                type="file"
+                name="deliverable"
+                class="form-control"
+                accept=".pdf,.doc,.docx,.zip"
+                required
+              >
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-semibold">Note to Client</label>
-              <textarea class="form-control" rows="3"
-                placeholder="Add any notes or instructions for the client..."></textarea>
+              <textarea 
+                name="note"
+                class="form-control"
+                rows="3"
+                placeholder="Add any notes or instructions for the client..."
+              ></textarea>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-gold">
+                <i class="bi bi-send me-2"></i>Submit for Client Confirmation
+              </button>
             </div>
           </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-gold">
-            <i class="bi bi-send me-2"></i>Submit for Client Confirmation
-          </button>
         </div>
       </div>
     </div>

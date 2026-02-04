@@ -56,6 +56,22 @@ $request = $requestModel->getClientIncomingRequestById(
     $pdo
 );
 
+// Fetch deliverables for this request (surveyor → client)
+$sql = "
+    SELECT *
+    FROM deliverables
+    WHERE request_to_client_id = ?
+    ORDER BY created_at DESC
+";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$request_id]);
+$deliverables = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$surveyorImage = !empty($request['profile_image'])
+    ? "../uploads/profile_images/" . $request['profile_image']
+    : "../assets/images/surveyor_avatar.jpg";
+
 if (!$request) {
     header("Location: incoming-requests.php");
     exit();
@@ -112,10 +128,14 @@ if (!$request) {
 
           <div class="request-detail-card">
             
-            <!-- Job Image -->
-            <img src="../assets/images/Sconnect 2.jpeg" alt="Job" class="job-image">
-
             <!-- Surveyor Information -->
+            <img 
+              src="<?= htmlspecialchars($surveyorImage) ?>" 
+              alt="Surveyor Profile"
+              class="job-image"
+              style="object-fit: cover;"
+            >
+
             <div class="detail-section">
               <h3 class="detail-section-title">
                 <i class="bi bi-person-fill"></i> Surveyor Information
@@ -249,21 +269,47 @@ if (!$request) {
 
         <div class="modal-body">
 
-          <p><strong>Surveyor:</strong> John Survey Ltd</p>
-          <p><strong>Job Title:</strong> Boundary Survey – Benue</p>
+          <?php if (empty($deliverables)): ?>
+            <div class="alert alert-info mb-0">
+              <i class="bi bi-info-circle me-1"></i>
+              No deliverables have been submitted yet.
+            </div>
+          <?php else: ?>
 
-          <hr>
+            <?php foreach ($deliverables as $item): ?>
+              <div class="file-item">
+                <span>
+                  <i class="bi bi-file-earmark-text me-2"></i>
+                  <?= htmlspecialchars(basename($item['file_path'])) ?>
+                </span>
 
-          <div class="file-item">
-            <span><i class="bi bi-file-pdf text-danger"></i> Boundary_Report.pdf</span>
-            <a href="../uploads/boundary_report.pdf" class="btn btn-sm btn-outline-success" download>
-              Download
-            </a>
-          </div>
+                <a 
+                  href="../uploads/deliverables/<?= htmlspecialchars($item['file_path']) ?>"
+                  class="btn btn-sm btn-outline-success"
+                  download
+                >
+                  Download
+                </a>
+              </div>
 
-          <p>Note to Client: Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis similique rerum voluptate, laudantium eveniet qui obcaecati impedit commodi nulla numquam reiciendis id praesentium quia nesciunt ullam. Voluptatum eligendi minima tempora!</p>
+              <?php if (!empty($item['note_to_client'])): ?>
+                <p class="text-muted mt-2">
+                  <strong>Note from Surveyor:</strong><br>
+                  <?= nl2br(htmlspecialchars($item['note_to_client'])) ?>
+                </p>
+              <?php endif; ?>
+
+              <small class="text-muted d-block mb-3">
+                Uploaded on <?= date('d M Y, g:i A', strtotime($item['created_at'])) ?>
+              </small>
+
+              <hr>
+            <?php endforeach; ?>
+
+          <?php endif; ?>
 
         </div>
+
 
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

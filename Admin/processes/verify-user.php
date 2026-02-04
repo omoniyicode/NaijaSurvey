@@ -34,5 +34,5 @@ $sql = "UPDATE $table SET verification_status = ? WHERE id = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$status, $id]);
 
-header("Location: ../verify_users.php");
+header("Location: ../verification.php");
 exit();

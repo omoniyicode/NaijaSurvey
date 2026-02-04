@@ -38,6 +38,22 @@ $request = $requestModel->getSurveyorIncomingRequestById(
     $pdo
 );
 
+// get latest deliverable for this request (if any)
+$sql = "
+    SELECT *
+    FROM deliverables
+    WHERE request_to_surveyor_id = ?
+      AND surveyor_profile_id = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+";
+
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$request_id, $surveyor_profile_id]);
+$deliverable = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
 if (!$request) {
     header("Location: incoming-requests.php");
     exit();
@@ -201,14 +217,6 @@ $clientImage = !empty($request['profile_image'])
 
                   </div>
                   <div class="detail-item">
-                    <strong>Phone</strong>
-                    <span><?php echo htmlspecialchars($request['phone']); ?></span>
-                  </div>
-                  <div class="detail-item">
-                    <strong>WhatsApp</strong>
-                    <span><?php echo htmlspecialchars($request['whatsapp_phone']); ?></span>
-                  </div>
-                  <div class="detail-item">
                     <strong>State</strong>
                     <span><?php echo htmlspecialchars($request['state']); ?></span>
                   </div>
@@ -218,7 +226,10 @@ $clientImage = !empty($request['profile_image'])
                   </div>
                   <div class="detail-item">
                     <strong>Member Since</strong>
-                    <span><?php echo htmlspecialchars($request['created_at']); ?></span>
+                    <span>
+                     <?php echo htmlspecialchars($request['created_at']); ?>
+                    </span>
+
                   </div>
                 </div>
                 <div class="mt-3">
@@ -232,15 +243,54 @@ $clientImage = !empty($request['profile_image'])
 
             <hr>
 
+            <?php if ($deliverable): ?>
+              <hr>
+
+              <div class="detail-section">
+                <h3 class="detail-section-title">
+                  <i class="bi bi-folder2-open"></i> Submitted Deliverable
+                </h3>
+
+                <div class="file-item">
+                  <span>
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    Survey Deliverable
+                  </span>
+
+                  <a 
+                    href="../uploads/deliverables/<?php echo htmlspecialchars($deliverable['file_path']); ?>"
+                    class="btn btn-sm btn-outline-success"
+                    download
+                  >
+                    Download
+                  </a>
+                </div>
+
+                <?php if (!empty($deliverable['note'])): ?>
+                  <p class="text-muted mt-2">
+                    <strong>Note:</strong><br>
+                    <?php echo nl2br(htmlspecialchars($deliverable['note'])); ?>
+                  </p>
+                <?php endif; ?>
+
+                <small class="text-muted">
+                  Uploaded on <?php echo date("d M Y, g:i A", strtotime($deliverable['uploaded_at'])); ?>
+                </small>
+              </div>
+            <?php endif; ?>
+
+
             <!-- Action Buttons -->
             <div class="action-buttons">
               <form method="post" action="processes/update-request.php">
-                <input type="hidden" name="request_id" value="<?php echo $request_id; ?>">
-                <input type="hidden" name="action" value="accepted">
-                <button class="btn btn-success">
-                  <i class="bi bi-check-circle me-1"></i> Accept
-                </button>
+                  <input type="hidden" name="request_id" value="<?php echo $request_id; ?>">
+                  <input type="hidden" name="action" value="accepted">
+
+                  <button type="submit" class="btn btn-success">
+                      <i class="bi bi-check-circle me-1"></i> Accept
+                  </button>
               </form>
+
               <button class="btn btn-gold" data-bs-toggle="modal" data-bs-target="#deliverableModal">
                 <i class="bi bi-cloud-upload me-2"></i>Upload Deliverables
               </button>
@@ -262,33 +312,46 @@ $clientImage = !empty($request['profile_image'])
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <form>
+          <form 
+            method="post" 
+            action="processes/upload-deliverable.php" 
+            enctype="multipart/form-data"
+          >
+
+            <input type="hidden" name="request_id" value="<?php echo $request_id; ?>">
+
             <div class="mb-4">
               <label class="form-label fw-semibold">Upload Work Deliverable</label>
-              <div class="upload-deliverable-box">
-                <label class="upload-label">
-                  <i class="bi bi-cloud-upload fs-1 d-block mb-2"></i>
-                  Click to upload file
-                  <input type="file" accept=".pdf,.doc,.docx,.zip">
-                </label>
-                <p class="text-muted small mt-3 mb-0">
-                  Survey reports, images, drawings, signed documents, if applicable, all bundled as a single document (PDF preferred).
-                </p>
-              </div>
+              <input 
+                type="file" 
+                name="deliverable"
+                class="form-control"
+                accept=".pdf,.doc,.docx,.zip"
+                required
+              >
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-semibold">Note to Client</label>
-              <textarea class="form-control" rows="3" placeholder="Add any notes or instructions for the client..."></textarea>
+              <textarea 
+                name="note"
+                class="form-control" 
+                rows="3"
+                placeholder="Add any notes or instructions..."
+              ></textarea>
             </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-gold w-40">
+                <i class="bi bi-send me-2"></i>Submit for client confirmation
+              </button>
+            </div>
+
           </form>
+
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-gold">
-            <i class="bi bi-send me-2"></i>Submit for Client Confirmation
-          </button>
-        </div>
+        
       </div>
     </div>
   </div>

@@ -16,7 +16,6 @@
     <i class="bi bi-send-fill"></i> Outgoing Requests
   </a>
   <a href="profile.php"><i class="bi bi-person-fill"></i> Profile</a>
-  <a href="surveyor-upload.php"><i class="bi bi-cloud-upload-fill"></i> Upload Jobs</a>
 
   <div class="logout">
     <a href="../includes/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a>
