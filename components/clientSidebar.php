@@ -41,9 +41,6 @@
   <a href="../client/outgoing-requests.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'outgoing-requests.php' || basename($_SERVER['PHP_SELF']) == 'outgoing-request.php' ? 'active' : ''; ?>">
     <i class="bi bi-send-fill"></i> Outgoing Requests
   </a>
-  <a href="../client/confirm-job-completion.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'confirm-job-completion.php' ? 'active' : ''; ?>">
-    <i class="bi bi-briefcase-fill"></i> Deliverables
-  </a>
   <a href="../client/profile.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>">
     <i class="bi bi-person-fill"></i> Profile
   </a>
