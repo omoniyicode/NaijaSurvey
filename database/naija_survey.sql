@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 03, 2026 at 02:08 AM
+-- Generation Time: Feb 05, 2026 at 08:23 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -195,6 +195,32 @@ CREATE TABLE IF NOT EXISTS `job_requests` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `request_deliverables`
+--
+
+DROP TABLE IF EXISTS `request_deliverables`;
+CREATE TABLE IF NOT EXISTS `request_deliverables` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `request_id` int NOT NULL,
+  `surveyor_profile_id` int NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `note` text,
+  `uploaded_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `request_id` (`request_id`),
+  KEY `surveyor_profile_id` (`surveyor_profile_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `request_deliverables`
+--
+
+INSERT INTO `request_deliverables` (`id`, `request_id`, `surveyor_profile_id`, `file_path`, `note`, `uploaded_at`) VALUES
+(1, 2, 2, '1770129022_King_Zenith_Exact_Styled_Letterhead.docx', 'arjnbogn[oinsbtn\'oij', '2026-02-03 03:30:22');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `request_to_clients`
 --
 
@@ -205,6 +231,7 @@ CREATE TABLE IF NOT EXISTS `request_to_clients` (
   `surveyor_profile_id` int NOT NULL,
   `client_profile_id` int NOT NULL,
   `request_status` enum('pending','accepted','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
+  `updated_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_rtc_job` (`job_id`),
@@ -216,11 +243,11 @@ CREATE TABLE IF NOT EXISTS `request_to_clients` (
 -- Dumping data for table `request_to_clients`
 --
 
-INSERT INTO `request_to_clients` (`id`, `job_id`, `surveyor_profile_id`, `client_profile_id`, `request_status`, `created_at`) VALUES
-(1, 1, 1, 1, 'pending', '2026-01-29 08:28:45'),
-(2, 2, 1, 1, 'pending', '2026-01-29 08:50:13'),
-(3, 12, 2, 1, 'pending', '2026-02-01 11:32:26'),
-(4, 21, 2, 2, 'accepted', '2026-02-01 12:14:42');
+INSERT INTO `request_to_clients` (`id`, `job_id`, `surveyor_profile_id`, `client_profile_id`, `request_status`, `updated_at`, `created_at`) VALUES
+(1, 1, 1, 1, 'pending', NULL, '2026-01-29 08:28:45'),
+(2, 2, 1, 1, 'pending', NULL, '2026-01-29 08:50:13'),
+(3, 12, 2, 1, 'pending', NULL, '2026-02-01 11:32:26'),
+(4, 21, 2, 2, 'accepted', NULL, '2026-02-01 12:14:42');
 
 -- --------------------------------------------------------
 
@@ -244,14 +271,15 @@ CREATE TABLE IF NOT EXISTS `request_to_surveyors` (
   PRIMARY KEY (`id`),
   KEY `fk_rts_client` (`client_profile_id`),
   KEY `fk_rts_surveyor` (`surveyor_profile_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `request_to_surveyors`
 --
 
 INSERT INTO `request_to_surveyors` (`id`, `client_profile_id`, `surveyor_profile_id`, `service_category`, `project_state`, `project_lga`, `project_address`, `estimated_budget`, `project_description`, `request_status`, `created_at`) VALUES
-(1, 2, 2, 'Site Layout', 'benue', 'otukpo', 'jimark avenue', '50000', 'my first project test to check', 'pending', '2026-02-01 14:35:12');
+(1, 2, 2, 'Site Layout', 'benue', 'otukpo', 'jimark avenue', '50000', 'my first project test to check', 'pending', '2026-02-01 14:35:12'),
+(2, 2, 2, 'Topographic Survey', 'benue', 'otukpo', 'jimark avenue', '25000', 'my first job', 'accepted', '2026-02-03 00:34:55');
 
 -- --------------------------------------------------------
 
@@ -293,12 +321,12 @@ CREATE TABLE IF NOT EXISTS `surveyors_profile` (
 --
 
 INSERT INTO `surveyors_profile` (`id`, `account_id`, `first_name`, `surname`, `other_names`, `phone_number`, `whatsapp_number`, `years_of_experience`, `bio`, `state`, `lga`, `address`, `profile_image`, `id_type`, `id_document`, `surcon_number`, `specialization`, `verification_status`, `verified_at`, `created_at`, `updated_at`, `rating`, `reviews_count`) VALUES
-(1, 1, 'John', 'Doe', 'Deed', '09123456789', '09123456789', 2, 'I am a surveyor', 'Benue', 'Otukpo', 'GRA', 'profile_697a272ee0fd8_1769613102.png', 'id_card', 'id_697a2476efc73_1769612406.pdf', '212356BN6QW', 'Land & Boundary Survey', 'verified', '2026-01-28 16:00:06', '2026-01-28 16:00:06', '2026-01-31 11:57:36', 4.8, 45),
+(1, 1, 'John', 'Doe', 'Deed', '09123456789', '09123456789', 2, 'I am a surveyor', 'Benue', 'Otukpo', 'GRA', 'profile_697a272ee0fd8_1769613102.png', 'id_card', 'id_697a2476efc73_1769612406.pdf', '212356BN6QW', 'Land & Boundary Survey', 'verified', '2026-01-28 16:00:06', '2026-01-28 16:00:06', '2026-02-03 00:26:32', 2.0, 45),
 (2, 3, 'Godsown', 'Omoniyi', 'Abraham', '09165478081', '09165478081', 5, 'I\'m a professional', 'benue', 'otukpo', 'no 10 jimark avenue', 'profile_697e95fc990a6_1769903612.png', 'surcon_slip', 'id_697e95fc997c5_1769903612.jpg', 'sur-50330', 'Engineering Survey', 'verified', '2026-01-30 09:57:45', '2026-01-30 09:57:45', '2026-01-31 12:57:27', 3.9, 19),
-(21, 1, 'Samuel', 'Okoro', NULL, '08011112222', '08011112222', 10, 'Experienced land and boundary surveyor with residential and commercial projects.', 'Lagos', 'Ikeja', 'Ikeja GRA', 'samuel.png', 'surcon_slip', 'samuel_id.pdf', 'SUR-10001', 'Land & Boundary Survey', 'pending', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-02 13:03:20', 4.8, 45),
-(22, 2, 'Aisha', 'Bello', NULL, '08022223333', '08022223333', 8, 'Engineering survey specialist with infrastructure and road projects experience.', 'Abuja', 'Gwagwalada', 'Phase 2', 'aisha.png', 'surcon_slip', 'aisha_id.pdf', 'SUR-10002', 'Engineering Survey', 'pending', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-02 12:13:37', 5.0, 62),
+(21, 1, 'Samuel', 'Okoro', NULL, '08011112222', '08011112222', 10, 'Experienced land and boundary surveyor with residential and commercial projects.', 'Lagos', 'Ikeja', 'Ikeja GRA', 'samuel.png', 'surcon_slip', 'samuel_id.pdf', 'SUR-10001', 'Land & Boundary Survey', 'pending', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-03 00:31:08', 4.8, 45),
+(22, 2, 'Aisha', 'Bello', NULL, '08022223333', '08022223333', 8, 'Engineering survey specialist with infrastructure and road projects experience.', 'Abuja', 'Gwagwalada', 'Phase 2', 'aisha.png', 'surcon_slip', 'aisha_id.pdf', 'SUR-10002', 'Engineering Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-03 00:25:58', 5.0, 62),
 (23, 3, 'Ibrahim', 'Musa', NULL, '08033334444', '08033334444', 12, 'Topographic surveyor with advanced mapping and terrain analysis skills.', 'Kaduna', 'Chikun', 'Sabon Tasha', 'ibrahim.png', 'surcon_slip', 'ibrahim_id.pdf', 'SUR-10003', 'Topographic Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-02 12:39:13', 2.0, 38),
-(24, 4, 'Chidinma', 'Okafor', NULL, '08044445555', '08044445555', 15, 'Cadastral survey expert with land registry and documentation experience.', 'Rivers', 'Obio-Akpor', 'Rumuola', 'chidinma.png', 'surcon_slip', 'chidinma_id.pdf', 'SUR-10004', 'Cadastral Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-01-31 13:52:37', 4.9, 71);
+(24, 4, 'Chidinma', 'Okafor', NULL, '08044445555', '08044445555', 15, 'Cadastral survey expert with land registry and documentation experience.', 'Rivers', 'Obio-Akpor', 'Rumuola', 'chidinma.png', 'surcon_slip', 'chidinma_id.pdf', 'SUR-10004', 'Cadastral Survey', 'verified', '2026-01-31 13:52:37', '2026-01-31 13:52:37', '2026-02-03 00:31:19', 4.5, 71);
 
 --
 -- Constraints for dumped tables
